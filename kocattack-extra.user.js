@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.4.1
+// @version          0.5.5
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the KOCAttack script from niknah (as of Oct. 24, 2010), but with some extra features.
@@ -197,7 +197,7 @@ function AddHtml(box1,txt) {
 
 var KOCAttack={
 	startListenTime:null,
-	prevAttack:{'x':"333",'y':'111'},
+	prevAttack:{'x':"350",'y':'350'},
 	options:null,
 	isChrome:navigator.userAgent.toLowerCase().indexOf('chrome') > -1,
 	valuesCache:{},
@@ -294,6 +294,7 @@ var KOCAttack={
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/chome_alliance_up.png' /></td><td valign='top'>"+
+			"<input id='KOCAttackDisableInviteFriends' type='checkbox' "+(this.options.disableInviteFriends?'checked':'')+" /> Disable the annoying \"Invite Friends\" popup dialog in-game.<br />"+
 			"<input id='KOCAttackAutoHelpAlliance' type='checkbox' "+(this.options.autoHelpAlliance?'checked':'')+" /> Automatically help alliance members with building/researching.<br />"+
 			"<input id='KOCAttackHideAllianceHelpRequests' type='checkbox' "+(this.options.hideAllianceHelpRequests?'checked':'')+" /> Hide alliance help requests/reports in chat (if above is checked, then after helping).<br />"+
 			"<input id='KOCAttackAutoPublishHelpRequests' type='checkbox' "+(this.options.autoPublishHelpRequests?'checked':'')+" /> Automatically speed up building/research by posting help requests to wall.<br />"+
@@ -375,6 +376,12 @@ var KOCAttack={
 			t.options.changeCitySecs=parseInt(ById('KOCAttackChangeCitySecs').value);
 			t.options.autoGoldHappiness=parseInt(ById('KOCAttackAutoGoldHappiness').value);
 			t.options.percentOfPopToTrain=parseFloat(ById('KOCAttackPercentOfPopToTrain').value);
+			
+			var prev_disableInviteFriends = t.options.disableInviteFriends;
+			t.options.disableInviteFriends=ById('KOCAttackDisableInviteFriends').checked;
+			if(prev_disableInviteFriends != t.options.disableInviteFriends){
+				alert("You changed the option for disabling/enabling the \"Invite Friends\" feature.\nPlease note: You will need to refresh the entire game window for the new setting to take effect!");
+			}
 			
 			t.options.autoHelpAlliance=ById('KOCAttackAutoHelpAlliance').checked;
 			t.options.hideAllianceHelpRequests=ById('KOCAttackHideAllianceHelpRequests').checked;
@@ -679,6 +686,7 @@ var KOCAttack={
 			"chromeKeepReports":2,
 			"percentOfPopToTrain":100,
 			"autoGoldHappiness":99,
+			"disableInviteFriends":false,
 			"autoHelpAlliance":true,
 			"hideAllianceHelpRequests":false,
 			"autoPublishHelpRequests":false,
@@ -722,7 +730,7 @@ var KOCAttack={
 	},
 
 	IsFirstAttackAtLocation:function(x,y) {
-		if(this.prevAttack){
+		if(this.prevAttack.x && this.prevAttack.y){
 			if(this.prevAttack.x==x && this.prevAttack.y==y) {
 				this.Log("Previous attack matches current attack. This is not first attack!");
 				return false;
@@ -814,7 +822,30 @@ var KOCAttack={
 		return this.SetAttackFromGuiXY(xy[0],xy[1],box);
 	},
 
+	AttackLastSentTime:0,	
+	UpdateAttackLastSentTime:function(){
+		this.AttackLastSentTime = new Date().getTime()/1000;
+		this.SetValue('AttackLastSentTime',this.AttackLastSentTime);
+	},
+	
 	SendingMultipleWaves:false,
+	IsCurrentlySendingMultipleWaves:function() {
+		if(this.AttackLastSentTime == 0){
+			this.AttackLastSentTime = this.GetValue('AttackLastSentTime',0);
+		}
+		var nowSecs = new Date().getTime()/1000;
+		var waveTimerDelay = this.options.attackDelay*2;
+		var timeDifference = nowSecs-this.AttackLastSentTime;
+		//this.Log("nowSecs: "+nowSecs+" waveTimerDelay: "+waveTimerDelay+" timeDifference: "+timeDifference+" SendingMultipleWaves: "+this.SendingMultipleWaves);
+		// If the last attack was sent at a time ago that is more than twice the attack delay,
+		// then we assume something failed and we reset the multiple wave tracker so everything can continue.
+		if(timeDifference > waveTimerDelay && this.SendingMultipleWaves==true){
+			this.SendingMultipleWaves=false;
+			this.Log("Multiple wave timer \("+waveTimerDelay+"\ seconds) has expired. Last known attack was sent "+timeDifference+" seconds ago. Resetting timer and continuing...");
+		}
+		return this.SendingMultipleWaves;
+	},
+	
 	SetAttackFromGuiXY:function(x,y,box,isSuicideWave) {
 		if(!isSuicideWave){
 			var isSuicideWave = false;
@@ -854,13 +885,14 @@ var KOCAttack={
 			var firstAttack=this.IsFirstAttackAtLocation(x,y);
 			this.Log("First attack?: "+firstAttack);
 			
-			this.Log("Suicide attack defined already? : "+SuicideAttackDefined);
-			
-			if(totalTroops>0 && ((troops[1]+troops[2]+troops[10])==totalTroops && firstAttack)){
-				this.Log("Suicide attack determined by first attack");
-			}
+			this.Log("Suicide attack defined? : "+SuicideAttackDefined);
 			
 			if(totalTroops>0 && (((troops[1]+troops[2]+troops[10])==totalTroops && firstAttack) || isSuicideWave)) {
+				if(totalTroops>0 && ((troops[1]+troops[2]+troops[10])==totalTroops && firstAttack)){
+					this.Log("Suicide attack determined by troop type and by first attack");
+				}else if(isSuicideWave){
+					this.Log("Suicide attack determined by checkbox");
+				}
 				// nothing but supply troops and/or militiamen and/or ballista. This must be an anti-defense suicide wave attack
 				this.Log("Suicide wave :"+troops);
 				attack.suicidewave=troops;
@@ -2156,12 +2188,15 @@ var KOCAttack={
 			// Make sure we have more than two available slots in attack queue if this is a suicide wave (unless there are only two slots even allowed)
 			var available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum;
 			//this.Log("Available marches: "+available_marches_num);
-			if(attack.a.suicidewave && attack.a.currenttattackwavetype == "suicide"){
-				if(available_marches_num >= 2 && this.currentRallyPointLevel >= 2){
-					// We're good
-				}else{
-					this.Log("Not attacking: Not enough available marching slots at rally point to launch both suicide wave and second wave for coordinates ("+attack.x+","+attack.y+")");
-					break;
+			if(attack.a.suicidewave && attack.a.currenttattackwavetype != "normal"){
+				//this.Log("Current attack wave type: "+attack.a.currenttattackwavetype);
+				if(available_marches_num < 2 || this.currentRallyPointLevel < 2){
+					// Make sure this is the first wave of the multi-wave attack and then don't send it if there aren't enough marching slots for both waves
+					if(this.prevAttack.x != attack.x && this.prevAttack.y != attack.y) {
+						// This is the first wave
+						this.Log("Not attacking: Not enough available marching slots at rally point to launch both suicide wave and second wave for coordinates ("+attack.x+","+attack.y+")");
+						break;
+					}
 				}
 			}
 			
@@ -2613,7 +2648,7 @@ var KOCAttack={
 		this.autoAttackTimeout=window.setTimeout(function() {
 			if(t.autoAttackTimeout==null) return;
 			t.autoAttackTimeout=null;
-			if(t.IsMapperRunning() || t.SendingMultipleWaves) {
+			if(t.IsMapperRunning() || t.IsCurrentlySendingMultipleWaves()) {
 				if(t.IsMapperRunning()){
 					t.Log("Waiting for mapping to finish");
 				}else{
@@ -2621,7 +2656,7 @@ var KOCAttack={
 				}
 				// don't reload until the mapper or multi-wave attack has finished.
 				window.setTimeout(function() {
-					t.StartReloadPageTimer(10*60);
+					t.StartReloadPageTimer();
 				},0);
 				return;
 			}
@@ -2630,6 +2665,36 @@ var KOCAttack={
 			t.ReloadWindow();
 		},refreshMSecs);
 		this.Log('reload page timer started');
+	},
+	
+	multipleWaveTimeout:null,
+	ClearMultipleWaveTimeout:function() {
+		if(this.multipleWaveTimeout!=null) {
+			this.Log('city switching timer killed');
+			window.clearTimeout(this.multipleWaveTimeout);
+			this.multipleWaveTimeout=null;
+		}
+	},
+	StartMultipleWaveTimer:function(secs) {
+		var t=this;
+		if(!secs) secs=t.options.attackDelay;
+		var attackDelayMSecs=t.GetRandTime(1000*secs);
+		this.Log('Waiting '+(attackDelayMSecs/1000)+' secs to retry second wave attack...');
+		this.ClearMultipleWaveTimeout();
+		this.multipleWaveTimeout=window.setTimeout(function() {
+			if(t.multipleWaveTimeout==null) return;
+			t.multipleWaveTimeout=null;
+			if(t.IsCurrentlySendingMultipleWaves()) {
+				t.Log("Waiting for multiple wave attack to finish...");
+				// don't switch cities until the multi-wave attack has finished.
+				window.setTimeout(function() {
+					t.StartMultipleWaveTimer();
+				},0);
+				return;
+			}
+			t.NextAutoAttackCity();
+		},attackDelayMSecs);
+		this.Log('Multiple wave attack timer started');
 	},
 
 	lastOpenViewReports:0,
@@ -2674,12 +2739,16 @@ var KOCAttack={
 		var t=this;
 		var autoAttack=this.GetAutoAttack();
 		if(!autoAttack) return;
-		
-		// Don't switch cities if we're in the middle of a multi-wave attack
-		if(t.SendingMultipleWaves){
+	
+		if(this.IsCurrentlySendingMultipleWaves()){
+			this.Log('Cannot change city. Waiting for multiple wave attack to finish...');
+			t.ClearMultipleWaveTimeout();
+			t.StartMultipleWaveTimer();
 			return;
+		}else{
+			t.ClearMultipleWaveTimeout();
 		}
-		
+	
 		// change to next city
 		this.autoAttacksThisCity=0;
 
@@ -2715,7 +2784,7 @@ var KOCAttack={
 		} else {
 			if(this.nextAutoAttackTimeout==null) {
 				var secs=t.GetRandTime(1000*t.options.changeCitySecs);
-				this.Log('change city:'+this.autoAttackCityUpto+', in '+(secs/1000)+'secs, loop:'+this.autoAttackCitiesDone);
+				this.Log('changing city to:'+this.autoAttackCityUpto+', in '+(secs/1000)+'secs, loop:'+this.autoAttackCitiesDone);
 				this.nextAutoAttackTimeout=setTimeout(function() {
 					t.nextAutoAttackTimeout=null;
 					t.SetValuesCache();
@@ -2792,6 +2861,8 @@ var KOCAttack={
 			unsafeWindow.modal_attack(4,bestAttack.x,bestAttack.y);
 			// Toggle attack waves between suicide and normal mode
 			this.ToggleCurrenttAttackWaveType(bestAttack.x,bestAttack.y);
+			// Update the last attack sent time
+			this.UpdateAttackLastSentTime();
 		} else if (bestAttack.type==1) {
 			unsafeWindow.modal_attack(1,bestAttack.x,bestAttack.y);
 		}
@@ -2857,7 +2928,7 @@ var KOCAttack={
 				}
 				window.setTimeout(function() {
 					startAttack();
-				},250);
+				},1000);
 			}
 			startAttack();
 		} else {
@@ -3415,9 +3486,9 @@ var KOCAttack={
 	},
 	*/
 
-
 	pageLoaded:false,
 	prevCurrentCity:-1,
+	inviteFriendsTabHidden:false,
 	idStatus:{},
 	ResetIdStatus:function() {
 		this.idStatus={};
@@ -3448,6 +3519,16 @@ var KOCAttack={
 				}
 			},5000);
 		}
+		
+		// Hide the invite friends tab on page load
+		if(!t.inviteFriendsTabHidden && t.options.disableInviteFriends){
+			var tabBar=ById("main_engagement_tabs");
+			var inviteFriendsTab=nHtml.FindByXPath(tabBar,".//a[contains(@onclick,'invite_friends_popup')]");
+			if(inviteFriendsTab){
+				inviteFriendsTab.style.display="none";
+				t.inviteFriendsTabHidden = true;
+			}
+		}
 
 		var domTickTimer=null;
 		var domTickUpto=0;
@@ -3468,7 +3549,7 @@ var KOCAttack={
 				t.CheckImpendingAttack();
 				t.HandlePublishPopup();
 			}
-
+			
 			if(cityChanged && cityId!=null) {
 				// changed city
 				setTimeout(function() {
@@ -3508,6 +3589,12 @@ var KOCAttack={
 				},
 				'modal_speedup':function(target) {
 					t.ClickShareToWall(target);
+				},
+				'invitePopup':function(target) {
+					if(t.options.disableInviteFriends){
+						// Hide the invite popup if auto attack is enabled
+						target.parentNode.removeChild(target);
+					}
 				},
 			};
 			
