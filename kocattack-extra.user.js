@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.5.5
+// @version          0.5.6
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the KOCAttack script from niknah (as of Oct. 24, 2010), but with some extra features.
@@ -3523,10 +3523,12 @@ var KOCAttack={
 		// Hide the invite friends tab on page load
 		if(!t.inviteFriendsTabHidden && t.options.disableInviteFriends){
 			var tabBar=ById("main_engagement_tabs");
-			var inviteFriendsTab=nHtml.FindByXPath(tabBar,".//a[contains(@onclick,'invite_friends_popup')]");
-			if(inviteFriendsTab){
-				inviteFriendsTab.style.display="none";
-				t.inviteFriendsTabHidden = true;
+			if(tabBar){
+				var inviteFriendsTab=nHtml.FindByXPath(tabBar,".//a[contains(@onclick,'invite_friends_popup')]");
+				if(inviteFriendsTab){
+					inviteFriendsTab.style.display="none";
+					t.inviteFriendsTabHidden = true;
+				}
 			}
 		}
 
