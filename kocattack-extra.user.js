@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.5.6
+// @version          0.5.9
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the KOCAttack script from niknah (as of Oct. 24, 2010), but with some extra features.
@@ -227,7 +227,8 @@ var KOCAttack={
 
 	ReloadWindow:function() {
 		//this.DoUnsafeWindow('window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);');
-		this.DoUnsafeWindow('window.location.reload(true);');
+		//this.DoUnsafeWindow('window.location.reload(true);');
+		setTimeout (function (){window.location.href = window.location.href;}, 0); 
 	},
 
 	ShowOptionsDialog:function() {
@@ -962,7 +963,8 @@ var KOCAttack={
 			this.SetAttack(x,y,attack);
 			return attack;
 		} else {
-			this.prevAttack=null;
+			// Reset it
+			this.prevAttack={'x':"350",'y':'350'};
 		}
 		return null;
 	},
@@ -1294,7 +1296,7 @@ var KOCAttack={
 			}
 		}
 		var command_timer=0;
-		var milliseconds_between=2000;
+		var milliseconds_between=4000;
 		for (var i=0;i<commands.length;i++) {
 			window.setTimeout(function() {
 				// Determine next unclicked button
@@ -1303,9 +1305,9 @@ var KOCAttack={
 					if(!commands[j].clicked){
 						t.DoUnsafeWindow(commands[j].command);
 						window.setTimeout(function() {
-							var abandon_confirm_window = ById("modalContent2");
-							if(abandon_confirm_window){
-								var okay_btn=nHtml.FindByXPath(abandon_confirm_window,".//a[contains(@class,'okay')]");
+							var mainbody = ById("mainbody");
+							if(mainbody){
+								var okay_btn=nHtml.FindByXPath(mainbody,".//a[contains(@class,'okay')]");
 								if(okay_btn){
 									nHtml.Click(okay_btn);
 								}
@@ -1491,6 +1493,12 @@ var KOCAttack={
 		}
 		b.addEventListener('click',function() {
 			var abandonWilds=t.GetAbandonWilds();
+			if(!abandonWilds){
+				var abandonWildsConfirm = confirm("Are you sure you want to automatically abandon all wildernesses?\n")
+				if (!abandonWildsConfirm){
+					return false;
+				}
+			}
 			t.SetAbandonWilds(abandonWilds?false:true);
 			SetAbandonWildsA();
 		},false);
