@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.5.9
+// @version          0.6.7
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the KOCAttack script from niknah (as of Oct. 24, 2010), but with some extra features.
@@ -228,7 +228,7 @@ var KOCAttack={
 	ReloadWindow:function() {
 		//this.DoUnsafeWindow('window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);');
 		//this.DoUnsafeWindow('window.location.reload(true);');
-		setTimeout (function (){window.location.href = window.location.href;}, 0); 
+		setTimeout (function (){window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);}, 0); 
 	},
 
 	ShowOptionsDialog:function() {
@@ -675,17 +675,17 @@ var KOCAttack={
 			"attackSecsSinceLastCamp":3600,
 			"attackSecsSinceLastWild":3600,
 			"attackSecsSinceLastTransport":60,
-			"randomPercent":20,
+			"randomPercent":10,
 			"keepReports":10,
 			"attackMaxDistance":60,
 			"lockAttackFromCity":true,
-			"waitAfterCitiesDone":15,
-			"autoAttackCitiesDoneMax":3,
-			"changeCitySecs":15,
+			"waitAfterCitiesDone":20,
+			"autoAttackCitiesDoneMax":2,
+			"changeCitySecs":20,
 			"retryMarch":true,
 			"noViewReports":false,
 			"chromeKeepReports":2,
-			"percentOfPopToTrain":100,
+			"percentOfPopToTrain":75,
 			"autoGoldHappiness":99,
 			"disableInviteFriends":false,
 			"autoHelpAlliance":true,
@@ -1488,7 +1488,7 @@ var KOCAttack={
 		b.className='button25';
 		
 		function SetAbandonWildsA() {
-			var str=t.GetAbandonWilds()?'Abandon Wilds':'Keep Wilds';
+			var str=t.GetAbandonWilds()?'Abandon Wilds - On':'Abandon Wilds - Off';
 			b.innerHTML='<span>'+str+'</span>';
 		}
 		b.addEventListener('click',function() {
@@ -1629,7 +1629,6 @@ var KOCAttack={
 
 						if(this.SetTroopInput(tr,troopCount)=='notfull') {
 							notFullTroops=true;
-
 						}
 					}
 				}
@@ -2451,6 +2450,14 @@ var KOCAttack={
 			setTimeout(function() {
 				t.DrawClosestFarms();
 			},0);
+			
+		};
+		var DeleteFarm=function(e) {
+			var xy=e.target.parentNode.parentNode.getAttribute('xy').split(',');
+			t.DeleteAttack(xy[0],xy[1]);
+			setTimeout(function() {
+				t.DrawClosestFarms();
+			},0);
 		};
 		
 		var aDone=0;
@@ -2540,8 +2547,8 @@ var KOCAttack={
 				
 				var aDelete=document.createElement('a');
 				aDelete.innerHTML='X';
-				aDelete.title='Ignore';
-				aDelete.addEventListener('click',function(e) { IgnoreFarm(e); },false);
+				aDelete.title='Delete';
+				aDelete.addEventListener('click',function(e) { DeleteFarm(e); },false);
 				tr.insertCell(-1).appendChild(aDelete);
 			
 				aDone++;
@@ -3252,6 +3259,21 @@ var KOCAttack={
 		return unsafeWindow.currentcityid;
 	},
 
+	
+	// returns {count, maxlevel}
+	getCityBuilding: function(cityId, buildingId){
+	  var b = unsafeWindow.seed.buildings['city'+cityId];
+	  var ret = {count:0, maxLevel:0};
+	  for (var i=1; i<33; i++){
+		if (b['pos'+i] && b['pos'+i][0] == buildingId){
+		  ++ret.count;
+		  if (parseInt(b['pos'+i][1]) > ret.maxLevel)
+			ret.maxLevel = parseInt(b['pos'+i][1]);
+		}
+	  }
+	  return ret;
+	},
+
 	lastTrainTroops:{},
 	CheckTrainTroops:function() {
 		var t=this;
@@ -3264,13 +3286,27 @@ var KOCAttack={
 			return;
 		}
 		var trainTroopId=trainTroops[cityid];
-
+		
 	//GM_log('buildTroops'+unsafeWindow.seed.citystats["city" +cityid ]["pop"][0]+"=="+unsafeWindow.seed.citystats["city" + cityid]["pop"][1]);
 		var popAvail=parseInt(unsafeWindow.seed.citystats["city" +cityid ]["pop"][0]);
 		var popTotal=parseInt(unsafeWindow.seed.citystats["city" + cityid]["pop"][1]);
 		var labourTotal=parseInt(unsafeWindow.seed.citystats["city" + cityid]["pop"][3]);
 		var idleTotal=popTotal-labourTotal;
 		var popNeeded=((t.options.percentOfPopToTrain/100)*idleTotal)+labourTotal;
+		
+		// Determine number of available training slots
+		var availableTrainingSlots = 0;
+		try{
+			var barracksTotal = this.getCityBuilding(cityid, 13).count;
+			var trainingSlotsUsed = unsafeWindow.seed.queue_unt['city'+cityid].length;
+			if(trainingSlotsUsed!=null){
+				var availableTrainingSlots = barracksTotal-trainingSlotsUsed;
+			}
+		}finally{
+			if(availableTrainingSlots<1){ return false; }
+		}
+
+		
 	//GM_log('idleTotal:'+idleTotal+', labourTotal:'+labourTotal+', popneeded:'+popNeeded);	
 		if(popAvail>0 && popAvail>=popNeeded) {
 			// avoid over training.
@@ -3652,34 +3688,36 @@ var KOCAttack={
 		};
 
 		var withinDomInserted=false;
-		document.body.addEventListener('DOMNodeInserted',function(e) {
-			if(withinDomInserted) return;
-			var isStatuses=(e.target.className && e.target.className=='statues')?true:false;
-			if(isStatuses)
-				t.pageLoaded=true;
-			if(e.target.id && e.target.id=='tooltip') {
-				withinDomInserted=true;
-				setTimeout(function() {
-					try {
-						t.DrawLevelIcons();
-						t.OnToolTipAppear(e.target);
-					} finally {
-						withinDomInserted=false;
-					}
-				},0);
-			} else if(e.target.className && e.target.className.indexOf('modal_msg_reports')>=0) {
-				withinDomInserted=true;
-				setTimeout(function() {
-					try {
-						t.RecordReports();
-						t.AddCheckBarbarians();
-						t.HighlightAllianceReports();
-					} finally {
-						withinDomInserted=false;
-					}
-				},0);
-			}
-		},false);
+		if(document.body){
+			document.body.addEventListener('DOMNodeInserted',function(e) {
+				if(withinDomInserted) return;
+				var isStatuses=(e.target.className && e.target.className=='statues')?true:false;
+				if(isStatuses)
+					t.pageLoaded=true;
+				if(e.target.id && e.target.id=='tooltip') {
+					withinDomInserted=true;
+					setTimeout(function() {
+						try {
+							t.DrawLevelIcons();
+							t.OnToolTipAppear(e.target);
+						} finally {
+							withinDomInserted=false;
+						}
+					},0);
+				} else if(e.target.className && e.target.className.indexOf('modal_msg_reports')>=0) {
+					withinDomInserted=true;
+					setTimeout(function() {
+						try {
+							t.RecordReports();
+							t.AddCheckBarbarians();
+							t.HighlightAllianceReports();
+						} finally {
+							withinDomInserted=false;
+						}
+					},0);
+				}
+			},false);
+		}
 		domTick();
 	},
 
@@ -3765,7 +3803,7 @@ function SetupQuickMarchButton(useRetryMarch) {
 		['modal_attack_do','modal_attack_doOld'],
 		['onSuccess:','onSuccess: marchSuccess='],
 //		['Modal.showAlert(printLocalError(','if(rslt.error_code==3 || rslt.error_code==8) { try {retryMarch(); } catch(e) { alert("retry failed:"+e); }  } else { Modal.hideModalAll(); }  Modal.showAlert(printLocalError('],
-		['Modal.showAlert(printLocalError(','if(rslt.error_code==3 || rslt.error_code==8) { try {window.setTimeout(function() { retryMarch(); },(3*1000)); } catch(e) { alert("retry failed:"+e); }  } else { Modal.hideModalAll(); }  Modal.showAlert(printLocalError(']
+		['Modal.showAlert(printLocalError(','if(rslt.error_code==3 || rslt.error_code==8) { try {window.setTimeout(function() { retryMarch(); },(3*1000)); } catch(e) { /*alert("retry failed:"+e);*/ }  } else { Modal.hideModalAll(); }  Modal.showAlert(printLocalError(']
 	];
 	
 	
@@ -3802,7 +3840,7 @@ function SetupQuickMarchButton(useRetryMarch) {
 				found=modalAttackFunc.indexOf(repI[0])>=0?true:false;
 			}
 			if(!found) {
-				alert("modalAttackReplace: cannot find: "+repI[0]+','+modalAttackFunc);
+				//alert("modalAttackReplace: cannot find: "+repI[0]+','+modalAttackFunc);
 			}
 			
 			modalAttackFunc=modalAttackFunc.replace(repI[0],repI[1]);
@@ -3812,7 +3850,7 @@ function SetupQuickMarchButton(useRetryMarch) {
 			window[nameOld]=eval(modalAttackFunc);
 //alert(window[nameOld].toString());			
 		} catch(e) {
-			alert(e+', bad func:'+modalAttackFunc);
+			//alert(e+', bad func:'+modalAttackFunc);
 		}
 
 		window[name]=function() {
@@ -3888,7 +3926,9 @@ function CreateMsgDiv() {
 			ml.appendChild(p);
 		}
 		//document.body.insertBefore(m,document.body.childNodes[0]);
-		document.body.appendChild(m);
+		if(document.body){
+			document.body.appendChild(m);
+		}
 	}
 	m.style.display='block';
 	return m;
