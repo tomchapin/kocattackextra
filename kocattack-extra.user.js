@@ -1,19 +1,53 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.6.7
+// @version          0.7.8
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the KOCAttack script from niknah (as of Oct. 24, 2010), but with some extra features.
 
-// @include          http://*.kingdomsofcamelot.com/*main_src.php*
-// @include          http://www.facebook.com/connect/uiserver.php*
+// @include          *apps.facebook.com/kingdomsofcamelot*
+// @include          *kingdomsofcamelot.com/*main_src.php*
+// @include          *kingdomsofcamelot.com/*newgame_src.php*
+// @include          *facebook.com/connect/uiserver.php*
 
 // @require          http://sizzlemctwizzle.com/updater.php?id=89473
 // ==/UserScript==
 
+
+var KOCAversion = '0.7.8';
+
+// Override the default alert functionality of the web browser (which causes the script to pause)
+// Instead of displaying alert popups, messages will be displayed in the firefox console
+unsafeWindow.alert = function(message) {
+	console.info("Javascript Alert: "+message);
+	if(typeof(GM_log)=="function"){
+		GM_log("Javascript Alert: "+message);
+	}
+}
+alert = unsafeWindow.alert;
+
+// String prototypes
 String.prototype.trim = function() { return this.replace(/^\s+|\s+$/g, ''); }
 String.prototype.StripQuotes = function() {
 	return this.replace(/"/g,'');
+};
+
+/*
+// Array remove function (found at http://ejohn.org/blog/javascript-array-remove/)
+	Examples:
+	Remove the second item from the array:
+		ArrayRemoveItem(array, 1);
+	Remove the second-to-last item from the array:
+		ArrayRemoveItem(array, -2);
+	Remove the second and third items from the array:
+		ArrayRemoveItem(array, 1,2);
+	Remove the last and second-to-last items from the array:
+		ArrayRemoveItem(array, -2,-1);
+*/
+ArrayRemoveItem = function(array, from, to) {
+  var rest = array.slice((to || from) + 1 || array.length);
+  array.length = from < 0 ? array.length + from : from;
+  return array.push.apply(array, rest);
 };
 
 if(!this.JSON2){JSON2={};}
@@ -199,9 +233,11 @@ var KOCAttack={
 	startListenTime:null,
 	prevAttack:{'x':"350",'y':'350'},
 	options:null,
+	iframeCommunicator:{},
 	isChrome:navigator.userAgent.toLowerCase().indexOf('chrome') > -1,
 	valuesCache:{},
 	seed:{},
+	currentPage:null,
 
 	DoUnsafeWindow:function(func, execute_by_embed) {
 		if(this.isChrome || execute_by_embed) {
@@ -218,17 +254,17 @@ var KOCAttack={
 	},
 
 	GetSeed:function() {
-		if(this.isChrome) {
-	//~~~ get seed
-			return this.seed;
-		}
 		return unsafeWindow.seed;
 	},
 
 	ReloadWindow:function() {
 		//this.DoUnsafeWindow('window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);');
-		//this.DoUnsafeWindow('window.location.reload(true);');
-		setTimeout (function (){window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);}, 0); 
+		if(this.options.useAlternateReloadMethod){
+			setTimeout (function (){window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);}, 0); 
+		}else{
+			//this.DoUnsafeWindow('window.location.reload(true);');
+			this.DoUnsafeWindow('history.go(0);');
+		}
 	},
 
 	ShowOptionsDialog:function() {
@@ -243,6 +279,7 @@ var KOCAttack={
 			div.style.backgroundColor='#fff';
 			div.style.border='3px solid #888';
 			div.style.padding='10px';
+			div.style.maxWidth='700px';
 			document.body.appendChild(div);
 		}
 
@@ -298,9 +335,15 @@ var KOCAttack={
 			"<input id='KOCAttackDisableInviteFriends' type='checkbox' "+(this.options.disableInviteFriends?'checked':'')+" /> Disable the annoying \"Invite Friends\" popup dialog in-game.<br />"+
 			"<input id='KOCAttackAutoHelpAlliance' type='checkbox' "+(this.options.autoHelpAlliance?'checked':'')+" /> Automatically help alliance members with building/researching.<br />"+
 			"<input id='KOCAttackHideAllianceHelpRequests' type='checkbox' "+(this.options.hideAllianceHelpRequests?'checked':'')+" /> Hide alliance help requests/reports in chat (if above is checked, then after helping).<br />"+
-			"<input id='KOCAttackAutoPublishHelpRequests' type='checkbox' "+(this.options.autoPublishHelpRequests?'checked':'')+" /> Automatically speed up building/research by posting help requests to wall.<br />"+
+			"<input id='KOCAttackAutoPublishGamePopups' type='checkbox' "+(this.options.autoPublishGamePopups?'checked':'')+" /> Automatically publish game popups (such as help requests) to facebook wall.<br />"+
 			"If above is checked, what privacy setting should we use? <select id='KOCAttackAutoPublishPrivacy'><option value='80'>Everyone</option><option value='50'>Friends of Friends</option><option value='40'>Friends Only</option><option value='10'>Only Me</option></select><br />"+
+			"</td></tr>"+
 			
+			"</td></tr>"+
+			"<tr><td valign='top' align='center'><img src='img/gems.png' /></td><td valign='top'>"+
+			"<input id='KOCAttackAutoLogBackIn' type='checkbox' "+(this.options.autoLogBackIn?'checked':'')+" /> Automatically log back into domain if disconnected due to maintenance or server down-time.<br />"+
+			"<input id='KOCAttackUseAlternateReload' type='checkbox' "+(this.options.useAlternateReloadMethod?'checked':'')+" /> Use alternate reload method (potentially useful if you keep getting the \"To display this page, Firefox must send information that will repeat any action\" error message).<br />"+
+			"<input id='KOCAttackEnableLogging' type='checkbox' "+(this.options.enableLogging?'checked':'')+" /> Enable diagnostic logging in the Firefox error console messages window (useful if trying to debug a problem or if you are submitting details along with a bug report).<br />"+
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/buildings/castle_lvl10.png' /></td><td valign='top'>"+
@@ -317,7 +360,7 @@ var KOCAttack={
 
 			"</table>"+
 			
-			"<a id='KOCAttackOptionsSave' class='button20'><span>Save</span></a> <a id='KOCAttackOptionsCancel' class='button20'><span>Cancel</span></a> <a id='KOCAttackOptionsReset' class='button20'><span>Reset options</span></a> <a id='KOCAttackOptionsResetAll' class='button20'><span>Reset all!</span></a> <a id='KOCAttackDeleteAllStoredAttacks' class='button20'><span>Delete all stored attacks</span></a></form>";
+			"<TABLE width=100%><TR><TD><a id='KOCAttackOptionsSave' class='button20'><span>Save</span></a> <a id='KOCAttackOptionsCancel' class='button20'><span>Cancel</span></a> <a id='KOCAttackOptionsReset' class='button20'><span>Reset options</span></a> <a id='KOCAttackOptionsResetAll' class='button20'><span>Reset all!</span></a> <a id='KOCAttackDeleteAllStoredAttacks' class='button20'><span>Delete all stored attacks</span></a></td><TD align=right>"+ KOCAversion +"</td></tr></form>";
 		var t=this;
 
 		var importText=ById('KOCAttackImport');
@@ -386,8 +429,12 @@ var KOCAttack={
 			
 			t.options.autoHelpAlliance=ById('KOCAttackAutoHelpAlliance').checked;
 			t.options.hideAllianceHelpRequests=ById('KOCAttackHideAllianceHelpRequests').checked;
-			t.options.autoPublishHelpRequests=ById('KOCAttackAutoPublishHelpRequests').checked;
+			t.options.autoPublishGamePopups=ById('KOCAttackAutoPublishGamePopups').checked;
 			t.options.autoPublishPrivacySetting=ById('KOCAttackAutoPublishPrivacy').value;
+			
+			t.options.autoLogBackIn=ById('KOCAttackAutoLogBackIn').checked;
+			t.options.useAlternateReloadMethod=ById('KOCAttackUseAlternateReload').checked;
+			t.options.enableLogging=ById('KOCAttackEnableLogging').checked;
 
 			t.options.attackSecsSinceLastCamp=parseFloat(ById('KOCAttackHoursSinceLastCamp').value)*60*60;
 			t.options.attackSecsSinceLastWild=parseFloat(ById('KOCAttackHoursSinceLastWild').value)*60*60;
@@ -542,10 +589,9 @@ var KOCAttack={
 	},
 
 	Log:function(str) {
-		str=this.GetServerId()+":"+str;
-		GM_log(str);
-		if(unsafeWindow.poclog) {
-			unsafeWindow.poclog.add(str);
+		if(this.options.enableLogging){
+			str=this.GetServerId()+":"+str;
+			GM_log(str);
 		}
 	},
 
@@ -687,11 +733,14 @@ var KOCAttack={
 			"chromeKeepReports":2,
 			"percentOfPopToTrain":75,
 			"autoGoldHappiness":99,
-			"disableInviteFriends":false,
+			"disableInviteFriends":true,
 			"autoHelpAlliance":true,
 			"hideAllianceHelpRequests":false,
-			"autoPublishHelpRequests":false,
+			"autoPublishGamePopups":false,
 			"autoPublishPrivacySetting":"80",
+			"autoLogBackIn":true,
+			"useAlternateReloadMethod":false,
+			"enableLogging":false,
 			"okCities":[1,1,1,1,1,1,1,1,1,1],
 			'impendingAttackUrl':''};
 		for(var n in defOptions) {
@@ -702,6 +751,30 @@ var KOCAttack={
 	},
 	SetOptions:function(v) {
 		this.SetValue('Options',JSON2.stringify(v));
+	},
+	
+	ClearCrossIframeCommands:function() {
+		this.SetValue('CrossIframeCommands',JSON.stringify({}));
+	},
+	GetCrossIframeCommands:function() {
+		var json=this.GetValue('CrossIframeCommands','{}');
+		if(json=='') json='{}';
+		var commands=JSON2.parse(json);
+		if(!commands.queue || commands.queue instanceof Array !== true){
+			commands.queue = new Array();
+		}
+		return commands;
+	},
+	SetCrossIframeCommands:function(v) {
+		this.SetValue('CrossIframeCommands',JSON2.stringify(v));
+	},
+	AddCrossIframeCommand:function(pageName, functionCall, functionParameters) {
+		var command = {};
+		command.pageName = pageName;
+		command.functionCall = functionCall;
+		var commands = this.GetCrossIframeCommands();
+		commands.queue.push(command);
+		this.SetCrossIframeCommands(commands);
 	},
 
 	GetAttackName:function(x,y) {
@@ -1433,8 +1506,8 @@ var KOCAttack={
 
 	HandlePublishPopup:function() {
 		var t=this;
-		if (unsafeWindow.location.href.match(/http:\/\/www.facebook.com\/connect\/uiserver.php/i)) {
-			if(t.options.autoPublishHelpRequests){
+		if (t.currentPage == "facebook_popup") {
+			if(t.options.autoPublishGamePopups){
 				// Check the app id (we only want to handle the popup for kingdoms of camelot)
 				var FBInputForm = ById('uiserver_form');
 				if(FBInputForm){
@@ -1456,11 +1529,106 @@ var KOCAttack={
 					}		
 				}
 			}
-		}else{
-			// Update the current server id locally for cross-domain access
-			if(t.currentServerId>0){
-				GM_setValue("KOCAttackLastKnownServerID", t.currentServerId);
+		}
+	},
+	
+	domainLoginTimer:null,
+	domainLoginStartTime:null,
+	domainLoginCurrentTime:null,
+	domainLoginSeconds:30,
+	domainLoginActionTaken:false,
+	HandleDomainLogin:function() {
+		var t=this;
+		if (t.currentPage == "domain_selection" && t.options.autoLogBackIn && !t.domainLoginActionTaken) {
+		
+			if(!t.domainLoginStartTime){
+				t.domainLoginStartTime = Math.round(new Date().getTime() / 1000);
 			}
+			t.domainLoginCurrentTime = Math.round(new Date().getTime() / 1000);
+			var timeDifference = Math.round(t.domainLoginStartTime+t.domainLoginSeconds - t.domainLoginCurrentTime);
+			if(timeDifference<0){ timeDifference=0; }
+			
+			var statusDiv=ById('KOCAttackLoginStatus');
+			if(!statusDiv) {
+				statusDiv=document.createElement('div');
+				statusDiv.id='KOCAttackLoginStatus';
+				statusDiv.style.position='relative';
+				statusDiv.style.backgroundColor='#fff';
+				statusDiv.style.border='3px solid #888';
+				statusDiv.style.margin='30px 0px 0px 0px';
+				statusDiv.style.padding='10px';
+				statusDiv.style.display='none';
+				var loginBox = ById("formoptions0");
+				loginBox.appendChild(statusDiv);
+			}
+		
+			// Find the top-most domain in the list (the most recent one)
+			var playButtons=document.evaluate(".//a[contains(@class,'button20')]", unsafeWindow.document.body, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null );
+			if(playButtons && playButtons.snapshotLength>0){
+				//var firstPlayButton = playButtons.snapshotItem(0);
+				//var domain_name = firstPlayButton.parentNode.parentNode.firstChild.innerHTML;
+				//statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging into '+domain_name+' in '+timeDifference+' seconds...</center>';
+				statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging back into KoC in '+timeDifference+' seconds...</center>';
+				if(timeDifference==0){
+					//t.Log("Loading URL: "+firstPlayButton.href);
+					t.Log("Loading URL: http://apps.facebook.com/kingdomsofcamelot/");
+					//statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging into '+domain_name+' now...</center>';
+					statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging back into KoC now...</center>';
+					var functionCall = {
+						'action':'load_url',
+						//'parameters':firstPlayButton.href
+						'parameters':'http://apps.facebook.com/kingdomsofcamelot/'
+					};
+					t.AddCrossIframeCommand("domain_selection_app_page", functionCall);
+					t.domainLoginActionTaken=true;
+					// Reload current window if things are unsuccessful
+					window.setTimeout(function() {
+						t.ReloadWindow();
+					},10000);
+				}
+			}else{
+				statusDiv.innerHTML='<center>KoCAttack Extra: Automatically reloading page in '+timeDifference+' seconds...</center>';
+				if(timeDifference==0){
+					statusDiv.innerHTML='<center>KoCAttack Extra: Automatically reloading page now...</center>';
+					t.ReloadWindow();
+					t.domainLoginActionTaken=true;
+				}
+			}
+			statusDiv.style.display='block';
+			
+			if(!t.domainLoginTimer && !t.domainLoginActionTaken) {
+				t.domainLoginTimer=window.setTimeout(function() {
+					t.domainLoginTimer=null;
+					t.HandleDomainLogin();
+				},1000);
+			}		
+		}
+	},
+	
+	HandleCrossIframeCommands:function() {
+		var t=this;
+		var commands = t.GetCrossIframeCommands();
+		if(!commands.queue) return false;
+		var commandsUpdated = false;
+		for(var i=0; i<commands.queue.length; i++) {
+			var command = commands.queue[i];
+			// Cross-iframe Command structure:
+			// commands {
+			//		command {
+			//			'pageName' (string) - The page to execute the code on
+			//			'functionCall' (string) - The function to call
+			//		}
+			// }
+			if(t.currentPage == command.pageName){
+				if(command.functionCall.action == "load_url"){
+					setTimeout (function (){window.location.href=command.functionCall.parameters;}, 0); 
+				}
+				ArrayRemoveItem(commands.queue, i);
+				commandsUpdated=true;
+			}
+		}
+		if(commandsUpdated){
+			this.SetCrossIframeCommands(commands);
 		}
 	},
 		
@@ -1509,7 +1677,7 @@ var KOCAttack={
 
 	ClickShareToWall:function(box) {
 		var t=this;
-		if(t.options.autoPublishHelpRequests){
+		if(t.options.autoPublishGamePopups){
 			var sharetowall_btn = nHtml.FindByXPath(box,".//a[contains(@onclick,'gethelp')]");
 			nHtml.Click(sharetowall_btn);
 		}
@@ -1607,7 +1775,7 @@ var KOCAttack={
 			var attackTypeSelect=ById('modal_attack_atktype');
 			// only fill things in if we're in attack mode.
 			if(attackTypeSelect.selectedIndex==0 && attack.type==0) {
-				if(this.prevAttack) { GM_log('Previous attack:'+this.prevAttack.x+'=='+xy[0] +','+this.prevAttack.y+'=='+xy[1] ); }
+				if(this.prevAttack) { this.Log('Previous attack:'+this.prevAttack.x+'=='+xy[0] +','+this.prevAttack.y+'=='+xy[1] ); }
 				var firstAttack = this.IsFirstAttackAtLocation(xy[0], xy[1]);
 				this.Log("current attack wave type: "+attack.currenttattackwavetype);
 				if(attack.suicidewave && attack.currenttattackwavetype=="suicide" && firstAttack) {
@@ -2615,14 +2783,14 @@ var KOCAttack={
 		return troops;
 	},
 
-	GetResourcesSize:function() {
-		var resources=[];
-		resources[0]=parseInt(ById('stat_gold_bar_num').innerHTML.replace(',','')); // Gold
-		resources[1]=parseInt(ById('stat_rec1_bar_num').innerHTML.replace(',','')); // Food
-		resources[2]=parseInt(ById('stat_rec2_bar_num').innerHTML.replace(',','')); // Wood
-		resources[3]=parseInt(ById('stat_rec3_bar_num').innerHTML.replace(',','')); // Stone
-		resources[4]=parseInt(ById('stat_rec4_bar_num').innerHTML.replace(',','')); // Ore
-		return resources;
+	GetResourcesSize:function() {  
+		var resources=[];  
+		resources[0]=parseInt(ById('stat_gold_bar_num').innerHTML.replace(/,/g,'')); // Gold  
+		resources[1]=parseInt(ById('stat_rec1_bar_num').innerHTML.replace(/,/g,'')); // Food  
+		resources[2]=parseInt(ById('stat_rec2_bar_num').innerHTML.replace(/,/g,'')); // Wood  
+		resources[3]=parseInt(ById('stat_rec3_bar_num').innerHTML.replace(/,/g,'')); // Stone  
+		resources[4]=parseInt(ById('stat_rec4_bar_num').innerHTML.replace(/,/g,'')); // Ore  
+		return resources;  
 	},
 
 	OpenViewReports:function() {
@@ -2794,7 +2962,6 @@ var KOCAttack={
 		if(!cityA || this.autoAttackCitiesDone>=this.options.autoAttackCitiesDoneMax) {
 			// ran out of cities, let's refresh in a minute
 			this.StartReloadPageTimer();
-
 			return;
 		} else {
 			if(this.nextAutoAttackTimeout==null) {
@@ -3239,7 +3406,7 @@ var KOCAttack={
 		a.className='button25';
 		var setTrainTroopsA=function() {
 			var trainTroops=JSON2.parse(t.GetValue('TrainTroops','{}'));
-			a.innerHTML='<span>'+(trainTroops[t.GetCurrentCityId()]==type?'Auto Training - On':'Auto Training - Off')+'</span>';
+			a.innerHTML='<span>'+(trainTroops[t.GetCurrentCityId()]==type?'Auto Train - On':'Auto Train - Off')+'</span>';
 		}
 		a.addEventListener('click',function() {
 			var trainTroops=JSON2.parse(t.GetValue('TrainTroops','{}'));
@@ -3348,7 +3515,22 @@ var KOCAttack={
 		}
 	},
 
-
+	DetermineCurrentPage:function() {
+		if(unsafeWindow.location.href.match(/kingdomsofcamelot\.com\/fb\/.*?\/src\/main_src\.php/i)){
+			this.currentPage = "koc_game";
+		}else if (unsafeWindow.location.href.match(/apps\.facebook\.com\/kingdomsofcamelot\/.*?page=nogame/i)) {
+			this.currentPage = "domain_selection_app_page";
+		}else if (unsafeWindow.location.href.match(/apps\.facebook\.com\/kingdomsofcamelot/i)) {
+			this.currentPage = "app_page";
+		}else if (unsafeWindow.location.href.match(/facebook.com\/connect\/uiserver.php/i)) {
+			this.currentPage = "facebook_popup";
+		}else if(unsafeWindow.location.href.match(/kingdomsofcamelot\.com\/fb\/.*?\/src\/newgame_src\.php/i)){
+			this.currentPage = "domain_selection";
+		}else{
+			this.currentPage = "unknown";
+		}
+		return this.currentPage;
+	},
 
 	OnImpendingAttack:function() {
 		var t=this;
@@ -3541,108 +3723,152 @@ var KOCAttack={
 		var t=this;
 		t.SetupMenu();
 		this.GetValuesCache();
-
 		t.ResetAutoAttackTarget();
 		this.options=this.GetOptions();
 		this.startListenTime=new Date();
-		window.setTimeout(function() {
-			if(!t.pageLoaded && t.GetAutoAttack() && !t.IsMapperRunning()) {
-				GM_log("whoops, game not loaded after 60 secs problem. reloading.");
-				t.SetValuesCache();
-				//window.location.reload(true);
-				t.ReloadWindow();
-				//window.history.go(0);
-			}
-		},t.GetRandTime(60*1000));
 		
-		if(t.GetAutoAttack()) {
+		// Determine which page we're on
+		t.DetermineCurrentPage();
+		
+		// Code strictly for page: koc_game
+		if(t.currentPage == "koc_game"){
+		
 			window.setTimeout(function() {
-				// press start on the poc timer after we reload
-				if(unsafeWindow.poctoggletimer && unsafeWindow.ispaused) {
-					unsafeWindow.poctoggletimer();
+				if(!t.pageLoaded && t.GetAutoAttack() && !t.IsMapperRunning()) {
+					GM_log("whoops, game not loaded after 60 secs problem. reloading.");
+					t.SetValuesCache();
+					//window.location.reload(true);
+					t.ReloadWindow();
+					//window.history.go(0);
 				}
-			},5000);
-		}
-		
-		// Hide the invite friends tab on page load
-		if(!t.inviteFriendsTabHidden && t.options.disableInviteFriends){
-			var tabBar=ById("main_engagement_tabs");
-			if(tabBar){
-				var inviteFriendsTab=nHtml.FindByXPath(tabBar,".//a[contains(@onclick,'invite_friends_popup')]");
-				if(inviteFriendsTab){
-					inviteFriendsTab.style.display="none";
-					t.inviteFriendsTabHidden = true;
+			},t.GetRandTime(60*1000));
+
+			if(t.GetAutoAttack()) {
+				window.setTimeout(function() {
+					// press start on the poc timer after we reload
+					if(unsafeWindow.poctoggletimer && unsafeWindow.ispaused) {
+						unsafeWindow.poctoggletimer();
+					}
+				},5000);
+			}
+			
+			// Hide the invite friends tab on page load
+			if(!t.inviteFriendsTabHidden && t.options.disableInviteFriends){
+				var tabBar=ById("main_engagement_tabs");
+				if(tabBar){
+					var inviteFriendsTab=nHtml.FindByXPath(tabBar,".//a[contains(@onclick,'invite_friends_popup')]");
+					if(inviteFriendsTab){
+						inviteFriendsTab.style.display="none";
+						t.inviteFriendsTabHidden = true;
+					}
 				}
 			}
-		}
+		
+		} // End of code strictly for page: koc_game
 
 		var domTickTimer=null;
 		var domTickUpto=0;
 		var domTick=function(e) {
-			//if(e.target.className && !/(chat|city|slot)/.exec(e.target.className)) GM_log('xxx:'+e.target.className);
-			//if(e.target.id && e.target.id!='tooltip' && e.target.id('_l_')<0 && e.target.id.substring(0,2)!='l_' && e.target.id.substring(0,8)!='citysel_') GM_log('id:'+e.target.id);
-			var cityId=t.GetCurrentCityId();
-			var cityChanged=cityId!=t.prevCurrentCity?true:false;
-			if(cityChanged) {
-				t.prevCurrentCity=cityId;
-			}
 			
-			if((domTickUpto%10)==0) {
-				t.HandleChatPane();
-			}
+			var funcsById={};
 			
-			if((domTickUpto%20)==0) {
-				t.CheckImpendingAttack();
-				t.HandlePublishPopup();
+			// Handle cross-iframe commands (which are currently only being used for the domain selection page)
+			if (t.currentPage == "domain_selection" || t.currentPage == "domain_selection_app_page"){
+				if((domTickUpto%20)==0) {
+					t.HandleCrossIframeCommands();
+				}
 			}
-			
-			if(cityChanged && cityId!=null) {
-				// changed city
-				setTimeout(function() {
-					t.AddOptionsLink();
-					t.DrawClosestFarms();
-				},0);
-				setTimeout(function() {
-					t.DetermineCurrentRallyPointLevel();
-					t.DetermineCurrentMarchesNum();
-					t.CheckAutoRaiseGold();
-					t.CheckAbandonWilds();
-					t.CheckTrainTroops();
-				},1000);
-				setTimeout(function() {
-					t.CheckReports();
-				},3000);
-				setTimeout(function() {
-					t.NextAutoAttack();
-				},5000);
-			} 
 
-			var funcsById={
-				'castleModalTabs':function(target) {
-					t.OnCastleBoxAppear(target.parentNode);
-				},
-				'marketmain_bdy':function(target) {
-					t.OnMarketBoxAppear(target);
-				},
-				'modal_attack':function(target) {
-					window.setTimeout(function() {
-						t.OnAttackBoxAppear(target);
-					},250);
-				},
-				'barracks_train':function(target) {
-					t.AddTrainTroopsLink();
-					t.CheckTrainTroops();
-				},
-				'modal_speedup':function(target) {
-					t.ClickShareToWall(target);
-				},
-				'invitePopup':function(target) {
-					if(t.options.disableInviteFriends){
-						// Hide the invite popup if auto attack is enabled
-						target.parentNode.removeChild(target);
+			// Code strictly for page: koc_game
+			if(t.currentPage == "koc_game"){
+			
+				//if(e.target.className && !/(chat|city|slot)/.exec(e.target.className)) GM_log('xxx:'+e.target.className);
+				//if(e.target.id && e.target.id!='tooltip' && e.target.id('_l_')<0 && e.target.id.substring(0,2)!='l_' && e.target.id.substring(0,8)!='citysel_') GM_log('id:'+e.target.id);
+				var cityId=t.GetCurrentCityId();
+				var cityChanged=cityId!=t.prevCurrentCity?true:false;
+				if(cityChanged) {
+					t.prevCurrentCity=cityId;
+				}
+				
+				if((domTickUpto%10)==0) {
+					t.HandleChatPane();
+				}
+				
+				if((domTickUpto%20)==0) {
+					t.CheckImpendingAttack();
+				}
+				
+				if(cityChanged && cityId!=null) {
+					// changed city
+					setTimeout(function() {
+						t.AddOptionsLink();
+						t.DrawClosestFarms();
+					},0);
+					setTimeout(function() {
+						t.DetermineCurrentRallyPointLevel();
+						t.DetermineCurrentMarchesNum();
+						t.CheckAutoRaiseGold();
+						t.CheckAbandonWilds();
+						t.CheckTrainTroops();
+					},1000);
+					setTimeout(function() {
+						t.CheckReports();
+					},3000);
+					setTimeout(function() {
+						t.NextAutoAttack();
+					},5000);
+				}
+				
+				funcsById={
+					'castleModalTabs':function(target) {
+						t.OnCastleBoxAppear(target.parentNode);
+					},
+					'marketmain_bdy':function(target) {
+						t.OnMarketBoxAppear(target);
+					},
+					'modal_attack':function(target) {
+						window.setTimeout(function() {
+							t.OnAttackBoxAppear(target);
+						},250);
+					},
+					'barracks_train':function(target) {
+						t.AddTrainTroopsLink();
+						t.CheckTrainTroops();
+					},
+					'modal_speedup':function(target) {
+						t.ClickShareToWall(target);
+					},
+					'invitePopup':function(target) {
+						if(t.options.disableInviteFriends){
+							// Hide the invite popup if auto attack is enabled
+							target.parentNode.removeChild(target);
+						}
+					},
+				};
+				
+			} // End of code strictly for page: koc_game
+			
+			// Handle cross-domain facebook game publish requests
+			funcsById.RES_ID_fb_pop_dialog_table = function(target){
+				if (t.currentPage == "koc_game") {
+					// Update the current server id locally for cross-domain access
+					if(t.currentServerId>0 && t.currentPage == "koc_game"){
+						GM_setValue("KOCAttackLastKnownServerID", t.currentServerId);
 					}
-				},
-			};
+				}
+			}
+			if(t.currentPage == "facebook_popup"){
+				if((domTickUpto%20)==0) {
+					t.HandlePublishPopup();
+				}
+			}
+			
+			// Log back into domain if disconnected due to server down-time
+			if(t.currentPage == "domain_selection" && t.options.autoLogBackIn){
+				if((domTickUpto%20)==0) {
+					t.HandleDomainLogin();
+				}
+			}
 			
 			/*
 			if(e.target.id && funcsById[e.target.id]) {
@@ -3686,14 +3912,15 @@ var KOCAttack={
 				},250);
 			}
 		};
-
+		
 		var withinDomInserted=false;
 		if(document.body){
 			document.body.addEventListener('DOMNodeInserted',function(e) {
 				if(withinDomInserted) return;
 				var isStatuses=(e.target.className && e.target.className=='statues')?true:false;
-				if(isStatuses)
+				if(isStatuses){
 					t.pageLoaded=true;
+				}
 				if(e.target.id && e.target.id=='tooltip') {
 					withinDomInserted=true;
 					setTimeout(function() {
@@ -3718,56 +3945,15 @@ var KOCAttack={
 				}
 			},false);
 		}
+
 		domTick();
 	},
 
-
-	/*
-	AClearMessages:function() {
-		GM_log('ClearMessages');
-		var names=GM_listValues();
-		var attackPrefix='attack_'+this.GetServerId()+'_';
-		for(var n=0; n<names.length; n++) {
-			var name=names[n];
-			if(name.substring(0,7)!="attack_") continue;
-			GM_setValue(attackPrefix+name.substring(7),GM_getValue(name));
-		}
-	}
-	*/
-
-
 };
-
-/*
-if(location.href.indexOf('apps.facebook.com')>=0) {
-
-var FixFacebook={
-
-	FixIFrame:function() {
-		var iframe=nHtml.FindByXPath(document,"//iframe[contains(@class,'canvas_iframe_util')]");
-		while(iframe) {
-			iframe.style.overflow='visible';
-			iframe.style.width=window.innerWidth+'px';
-			iframe=iframe.parentNode;
-			if(iframe.tagName=='BODY') break;
-//			if(iframe.id && iframe.id.indexOf('content')>=0) { break; }
-//			if(iframe.className && iframe.className.indexOf('UIStandardFrame_Content')>=0) { break; }
-		}
-	}
-
-};
-
-FixFacebook.FixIFrame();
-
-}
-*/
 
 
 KOCAttack.Listen();
 KOCAttack.SetupClearMessages();
-
-
-
 
 
 function SetupQuickMarchButton(useRetryMarch) {
@@ -3811,9 +3997,9 @@ function SetupQuickMarchButton(useRetryMarch) {
 		['attack_generatequeue','attack_generatequeueOld'],
 		['class=\\"army\\">" + g_js_strings.commonstr.army + ": "','style=\\"width: 145px !important\\" class=\\"army\\">"'],
 		['class=\\"name','style=\\"width: 0px !important; display: none;\\" class=\\"name'],
-		['var u = 0;','var u = "K:"+seed.knights["city" + currentcityid]["knt" + q].combat+", "; '],
-		['u += parseInt','var x = parseInt'],
-		['"Count"]);','"Count"]); if(x>0) { var uname=unitcost["unt"+r][0]; u+=uname[0]+uname[uname.length-1]+":"+x+", "; } '],
+    ['var r = 0;','var r = "K:"+seed.knights["city" + currentcityid]["knt" + t].combat+", "; '],
+    ['r += parseInt','var xxx = parseInt'],
+    ['"Count"]);' , '"Count"]); if(xxx>0) { var uname=unitcost["unt"+p][0]; r+=uname[0]+uname[uname.length-1]+":"+xxx+", "; } '],
 		//[/123/g,'100']
 	];
 	
@@ -3950,5 +4136,3 @@ function SetupScripts() {
 }
 
 SetupScripts();
-
-
