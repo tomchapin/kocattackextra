@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.7.8
+// @version          0.7.9
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
-// @description      Same as the KOCAttack script from niknah (as of Oct. 24, 2010), but with some extra features.
+// @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
 
 // @include          *apps.facebook.com/kingdomsofcamelot*
 // @include          *kingdomsofcamelot.com/*main_src.php*
@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.7.8';
+var KOCAversion = '0.7.9';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -259,12 +259,23 @@ var KOCAttack={
 
 	ReloadWindow:function() {
 		//this.DoUnsafeWindow('window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);');
-		if(this.options.useAlternateReloadMethod){
-			setTimeout (function (){window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);}, 0); 
-		}else{
+		//if(this.options.useAlternateReloadMethod){
+		//	setTimeout (function (){window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);}, 0); 
+		//}else{
 			//this.DoUnsafeWindow('window.location.reload(true);');
-			this.DoUnsafeWindow('history.go(0);');
+		//	this.DoUnsafeWindow('history.go(0);');
+		//}
+		var m=/^[a-zA-Z]+([0-9]+)\./.exec(document.location.hostname);
+		if (m == null){
+			history.go(0);
+			return;
 		}
+		var goto = 'http://apps.facebook.com/kingdomsofcamelot/?s='+m[1];
+		var t = '<FORM target="_top" action="'+ goto +'" method=post><INPUT id=xxButReload type=submit value=RELOAD><input type=hidden name=s value="'+ m[1] +'"</form>';
+		var e = document.createElement ('div');
+		e.innerHTML = t;
+		document.body.appendChild (e);
+		setTimeout (function (){document.getElementById('xxButReload').click();}, 0);
 	},
 
 	ShowOptionsDialog:function() {
@@ -342,7 +353,6 @@ var KOCAttack={
 			"</td></tr>"+
 			"<tr><td valign='top' align='center'><img src='img/gems.png' /></td><td valign='top'>"+
 			"<input id='KOCAttackAutoLogBackIn' type='checkbox' "+(this.options.autoLogBackIn?'checked':'')+" /> Automatically log back into domain if disconnected due to maintenance or server down-time.<br />"+
-			"<input id='KOCAttackUseAlternateReload' type='checkbox' "+(this.options.useAlternateReloadMethod?'checked':'')+" /> Use alternate reload method (potentially useful if you keep getting the \"To display this page, Firefox must send information that will repeat any action\" error message).<br />"+
 			"<input id='KOCAttackEnableLogging' type='checkbox' "+(this.options.enableLogging?'checked':'')+" /> Enable diagnostic logging in the Firefox error console messages window (useful if trying to debug a problem or if you are submitting details along with a bug report).<br />"+
 			"</td></tr>"+
 			
@@ -433,7 +443,6 @@ var KOCAttack={
 			t.options.autoPublishPrivacySetting=ById('KOCAttackAutoPublishPrivacy').value;
 			
 			t.options.autoLogBackIn=ById('KOCAttackAutoLogBackIn').checked;
-			t.options.useAlternateReloadMethod=ById('KOCAttackUseAlternateReload').checked;
 			t.options.enableLogging=ById('KOCAttackEnableLogging').checked;
 
 			t.options.attackSecsSinceLastCamp=parseFloat(ById('KOCAttackHoursSinceLastCamp').value)*60*60;
@@ -739,7 +748,6 @@ var KOCAttack={
 			"autoPublishGamePopups":false,
 			"autoPublishPrivacySetting":"80",
 			"autoLogBackIn":true,
-			"useAlternateReloadMethod":false,
 			"enableLogging":false,
 			"okCities":[1,1,1,1,1,1,1,1,1,1],
 			'impendingAttackUrl':''};
