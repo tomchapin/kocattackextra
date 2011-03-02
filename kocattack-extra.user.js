@@ -1,20 +1,20 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.7.9
+// @version          0.8.5b
 // @namespace        KOCAttack-Extra
-// @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
 
 // @include          *apps.facebook.com/kingdomsofcamelot*
-// @include          *kingdomsofcamelot.com/*main_src.php*
+// @include          *.kingdomsofcamelot.com/*main_src.php*
 // @include          *kingdomsofcamelot.com/*newgame_src.php*
 // @include          *facebook.com/connect/uiserver.php*
 
 // @require          http://sizzlemctwizzle.com/updater.php?id=89473
+
 // ==/UserScript==
 
 
-var KOCAversion = '0.7.9';
+var KOCAversion = '0.8.5b';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -228,6 +228,19 @@ function AddHtml(box1,txt) {
 	return txtObj;
 }
 
+function getAttackTypeSelected (){
+  if (document.getElementById('modal_attack_tab_4').className == 'selected')  // attack
+    return 0;
+  if (document.getElementById('modal_attack_tab_1').className == 'selected')  // transport
+    return 1;
+  if (document.getElementById('modal_attack_tab_3').className == 'selected')  // scout
+    return 2;
+  if (document.getElementById('modal_attack_tab_2').className == 'selected')  // reinforce
+    return 3;
+  if (document.getElementById('modal_attack_tab_5').className == 'selected')  // reassign
+    return 4;
+	return null;
+}
 
 var KOCAttack={
 	startListenTime:null,
@@ -256,22 +269,284 @@ var KOCAttack={
 	GetSeed:function() {
 		return unsafeWindow.seed;
 	},
+	
+		ShowViewAttacksDialog:function() {
+		var t=this;
+		t.attacks=[];
+		var div=ById('KOCAttackViewAttacks');
+		if(!div) {
+			div=document.createElement('div');
+			div.id='KOCAttackViewAttacks';
+			div.style.zIndex=100000;
+			div.style.position='absolute';
+			div.style.left='8px';
+			div.style.top='8px';
+			div.style.backgroundColor='#fff';
+			div.style.border='3px solid #888';
+			div.style.padding='10px';
+			document.body.appendChild(div);
+		}
+		var cities=this.GetSeed().cities;
+		//WinLog.write(inspect(cities));
+		var citysel ='<select id=srcCity>';
+		citysel += '<option value=All>All Cities</option>';
+		for(var c=0; c<cities.length; c++) {
+			citysel += '<option value="'+cities[c][1]+'">'+cities[c][1]+'</option>';
+		}		
+		citysel += '</select>';
+		
+		var levelsel ='<select id=srcLevel>';
+		levelsel += '<option value="All">All Levels</option>';
+		for(var c=1; c<=10; c++) {
+			levelsel += '<option value="'+c+'">Level '+c+'</option>';
+		}
+		levelsel += '</select>';
+		
+		div.style.display='block';
+		div.innerHTML='';
+		var m = '<DIV id="srcAttackOpts" style="height:30px">\
+		<TABLE><TR valign=bottom><TD class=xtab width=100 align=center>Search for: </td><TD align=left>\
+		<SELECT id=srcAttack>\
+		<OPTION value=All>All</option>\
+		<OPTION value=Camp>Barb Camp</option>\
+		<OPTION value=Wilderness>Wilderness</option>\
+		<OPTION value=Grassland>Grassland</option>\
+		<OPTION value=Lake>Lake</option>\
+		<OPTION value=Mountains>Mountains</option>\
+		<OPTION value=Forest>Woods</option>\
+		<OPTION value=Hills>Hills</option>\
+		<OPTION value=Plain>Plains</option>\
+		<OPTION value=City>City</option>\
+		</select></td>\
+		<td class=xtab width=100 align=center>Select City: &nbsp; </td>\
+		 <td align=left><span id=ptattackcity></span></td>\
+		 <td class=xtab width=100 align=center>Select Level: &nbsp; </td>\
+		 <td align=left><span id=ptattacklevel></span></td></tr>\
+		</table></div>\
+		<a id="KOCAttackViewAttacksCancel" class="button20"><span>Cancel</span></a>\
+		<a id="KOCAttackViewAttacksList" class="button20"><span>List Attacks</span></a>\
+		<a id="KOCAttackViewAttacksClearList" class="button20"><span>Clear List</span></a>\
+		<a id="KOCAttackViewAttacksDelete" class="button20"><span>Delete Selected</span></a>\
+		<a id="KOCAttackViewAttacksIgnore" class="button20"><span>Ignore/UnIgnore</span></a>\
+		<br><br><DIV id="srcAttackResults" style="height:470px; max-height:470px; overflow-y:auto;"></div>\
+		';
+		
+		var srcAttackResults = ById("srcAttackResults");
+		if (srcAttackResults != null){
+		  ById('KOCAttackViewAttacksClearList').click();
+		}		
+		div.innerHTML = m;
+		ById('ptattackcity').innerHTML = citysel;
+		ById('ptattacklevel').innerHTML = levelsel;
+
+		ById('KOCAttackViewAttacksClearList').addEventListener('click',function() {
+			ById('srcAttackResults').innerHTML='';
+		},false);										
+		
+		ById('KOCAttackViewAttacksCancel').addEventListener('click',function() {
+			div.style.display='none';
+		},false);
+				
+		ById('KOCAttackViewAttacksList').addEventListener('click',function() {
+		  t.attacks=[];
+		  t.DetailAttacks();
+		  //WinLog.write(inspect(t.attacks,10));
+		  
+		  var cityQuery = ById('srcCity').value;
+		  var levelQuery = ById('srcLevel').value;
+		  var attackQuery = ById('srcAttack').value;
+		  
+		  var h = '<table>';
+		  h += '<thead><tr><td><input type=checkbox id=selAllAttacks></td><td>&nbsp;</td><td>City</td><td>Coords</td><td nowrap>Type</td>';
+		  h += '<td>Attack Troops</td><td>Suicide Wave/Resources</td><td>Time</td><td>Ignore</td></tr></thead>';
+		  var tableRows= '';
+		  var count = 1
+		  for(var a=0; a<t.attacks.length; a++) {
+			var levelInfo=t.GetLevelInfo(t.attacks[a]);
+			if (levelInfo==undefined) levelInfo='';
+			var type;
+			if (levelInfo.type){
+			  type = levelInfo.type;
+			}
+			else {
+			  type = 'City';
+			}
+
+			var displayRow = '';
+			if (cityQuery != 'All'){
+			  if (t.GetCityName(t.attacks[a]['fromCity']) != cityQuery){
+			    continue;
+			  }
+			}
+			if (levelQuery != 'All'){
+			  if (levelInfo.level != levelQuery){
+			    continue;
+			  }
+			}
+			
+			// if (typeQuery != 'All'){
+			  // if (t.attacks[a].currenttattackwavetype != typeQuery){
+			    // continue;
+			  // }
+			// }			
+			if (attackQuery != 'All'){
+			  if (type != attackQuery){
+			    continue;
+			  }
+			}					
+			tableRows += '<tr id=row'+count+' style="display: '+displayRow+';">';
+			tableRows += '<td><input type=checkbox id=sel'+count+'>';
+			tableRows += '<td>'+count+'</td><td>'+t.GetCityName(t.attacks[a]['fromCity'])+'</td>';
+			tableRows += '<td id=coords'+count+'>'+t.attacks[a].xy[0]+','+t.attacks[a].xy[1]+'</td>';
+
+			tableRows += '<td nowrap>'+type+' Level '+levelInfo.level+'</td>';
+			// tableRows += '<td>'+t.attacks[a].currenttattackwavetype+'</td>';
+
+            		tableRows += '<td>';
+			
+			if(typeof(t.attacks[a].troops)=="object") {
+			  var troops='';
+			  for(var i=1; i<t.attacks[a].troops.length; i++) {
+			    troops += t.attacks[a].troops[i]+',';
+   			}
+			  troops = troops.substring(0, troops.length - 1);
+			  tableRows += troops;
+  		}
+			else{
+			  tableRows += '&nbsp;';
+			}
+      tableRows += '</td>';
+
+      tableRows += '<td>';
+
+			if(typeof(t.attacks[a].suicidewave)=="object") {
+			  var suicide='';
+			  for(var i=1; i<t.attacks[a].suicidewave.length; i++) {
+			    suicide += t.attacks[a].suicidewave[i]+',';
+   			}
+			  suicide = suicide.substring(0, suicide.length - 1);
+			  tableRows += suicide;
+			}
+			else if (typeof(t.attacks[a].resources)=="object"){
+			  var resources='';
+			  for(var i=1; i<t.attacks[a].resources.length; i++) {
+			    resources += t.attacks[a].resources[i]+',';
+   			}
+			  resources = resources.substring(0, resources.length - 1);
+			  tableRows += resources;
+			}
+			else {
+			  tableRows += '&nbsp;';
+			}
+      tableRows += '</td>';
+			var nowSecs=new Date().getTime()/1000;
+			tableRows += '<td>'+SecsToStr(nowSecs-t.attacks[a].time)+'</td>';
+			
+			var ignChecked = '';
+			if (t.attacks[a].ignore == null || t.attacks[a].ignore==undefined){
+			  ignChecked = '';  
+			}else{
+			  ignChecked = 'CHECKED';
+			}
+			
+			tableRows += '<td><input type=checkbox name=chkIgnore id='+count+' '+ignChecked+'></td>';
+		 
+			tableRows += '</tr>';	
+		    	count++;
+		}
+		  
+		  h += tableRows + '</table>';
+		  ById('srcAttackResults').innerHTML = h;
+
+          ById('KOCAttackViewAttacksDelete').addEventListener('click',function() {
+			for (var i=1; i<count; i++){
+			  var row = 'sel'+i;
+			  if (ById(row) == undefined) continue;
+			  if (ById(row).checked == true){
+			    //ById(row).checked == false;
+			    var c = ById('coords'+i).innerHTML;
+			    var xy = c.split(",");
+			    GM_log('Coords '+xy[0]+' '+xy[1]);
+			    t.DeleteAttack(xy[0],xy[1]);
+			  }
+			}
+			var listBtn=ById('KOCAttackViewAttacksList');
+			nHtml.Click(listBtn);
+		  },false);
+		  
+		  for (var i=1; i<count; i++){
+		    var ignore = i;
+			t.addEvent(ById(ignore), "click", t.ChangeIgnore);
+		  }	
+		  
+		  		  	  
+		  ById('selAllAttacks').addEventListener('click',function() {
+		    var myChecked = true;
+			
+			if (ById('selAllAttacks').checked == false){
+			  myChecked = false;
+			}
+			
+			for (var i=1; i<count; i++){
+			  var row = 'sel'+i;
+			  ById(row).checked=myChecked;
+			}
+    	  },false);	
+		    
+ 	   },false);
+	},
+	
+	addEvent:function(obj, type, fn){
+	  if (obj.attachEvent) {
+	    obj['e' + type + fn] = fn;
+        obj[type + fn] = function(){obj['e' + type + fn](window.event);}
+        obj.attachEvent('on' + type, obj[type + fn]);
+      } 
+      else{
+         obj.addEventListener(type, fn, false);
+      }	
+	},
+	
+	ChangeIgnore:function(e){
+	  var c = ById('coords'+e.target.id).innerHTML;
+	  var xy = c.split(",");
+	  var serverID = this.GetServerId();
+	  
+	  var attackname = 'attack_'+ServerId+'_'+xy[0]+','+xy[1];
+	  var str = GM_getValue(attackname,'') 
+
+	  if(!str) return null;
+	  attack= JSON2.parse(str);
+	  attack.ignore=e.target.checked?true:undefined;
+	  //WinLog.write (inspect(attack,10));
+	  GM_setValue(attackname,JSON2.stringify(attack));
+	},	
+	
+	GetAttack:function(x,y) {
+		var str=this.browser_getValue(this.GetAttackName(x,y),'');
+		if(!str) return null;
+		return JSON2.parse(str);
+	},
+	
+	GetCityName:function(cityid) {  
+	  var cityName;
+	  for(var a=0; a<unsafeWindow.seed.cities.length; a++) {
+	    if(unsafeWindow.seed.cities[a][0] == cityid){
+		  var cityName = unsafeWindow.seed.cities[a][1];
+		}
+	  }
+	  return cityName;
+	},	
+	
 
 	ReloadWindow:function() {
-		//this.DoUnsafeWindow('window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);');
-		//if(this.options.useAlternateReloadMethod){
-		//	setTimeout (function (){window.location.href=window.location.href.toString().replace(/&current_time=[0-9]*/i, "")+"&current_time="+Math.round(new Date().getTime() / 1000);}, 0); 
-		//}else{
-			//this.DoUnsafeWindow('window.location.reload(true);');
-		//	this.DoUnsafeWindow('history.go(0);');
-		//}
-		var m=/^[a-zA-Z]+([0-9]+)\./.exec(document.location.hostname);
-		if (m == null){
+		var m=this.GetServerId();
+		if (m < 0){
 			history.go(0);
 			return;
 		}
-		var goto = 'http://apps.facebook.com/kingdomsofcamelot/?s='+m[1];
-		var t = '<FORM target="_top" action="'+ goto +'" method=post><INPUT id=xxButReload type=submit value=RELOAD><input type=hidden name=s value="'+ m[1] +'"</form>';
+		var goto = 'http://apps.facebook.com/kingdomsofcamelot/?s='+m;
+		var t = '<FORM target="_top" action="'+ goto +'" method=post><INPUT id=xxButReload type=submit value=RELOAD><input type=hidden name=s value="'+ m +'"</form>';
 		var e = document.createElement ('div');
 		e.innerHTML = t;
 		document.body.appendChild (e);
@@ -325,12 +600,10 @@ var KOCAttack={
 			"<input id='KOCAttackLockAttackFromCity' type='checkbox' "+(this.options.lockAttackFromCity?'checked':'')+" /> Only launch attacks from city they were first launched from.<br />"+
 			"<br />"+
 			"<input id='KOCAttackRetryMarch' type='checkbox' "+(this.options.retryMarch?'checked':'')+" /> Retry march if it has unknown/excess traffic error (press reload after changing this option).<br />"+
+			"<input id='KOCAttackImpendingStopAttack' type='checkbox' "+(this.options.impendingStopAttack?'checked':'')+" /> Stop auto attack on impeding alert.<span style='color:red'> (Will not restart auto after the attack. Use at your own risk)</span><br />"+
 			"Open up this url in a tab when we're under attack...<br /><input id='KOCAttackImpendingAttackUrl' size='60' value='"+(this.options.impendingAttackUrl)+"' /><br />"+
 			
 			"</td></tr>"+
-
-			//http://cdn1.kingdomsofcamelot.com/fb/e2/src/img/units/unit_6_50.jpg?6545
-
 			"<tr><td valign='top' align='center'><img src='img/chrome_message_up.png' /></td><td valign='top'>"+
 			"<input id='KOCAttackRemoveReports' type='checkbox' "+(this.options.autoRemoveReports?'checked':'')+" /> Auto remove barbarian/wilderness attack reports.<br />"+
 			"<input id='KOCAttackKeepReports' value='"+this.options.keepReports+"' size='3' /> attack reports to keep maximum in the attack dialog.<br />"+
@@ -459,6 +732,7 @@ var KOCAttack={
 			t.options.autoRemoveReports=ById('KOCAttackRemoveReports').checked;
 			t.options.retryMarch=ById('KOCAttackRetryMarch').checked;
 			t.options.impendingAttackUrl=ById('KOCAttackImpendingAttackUrl').value;
+			t.options.impendingStopAttack=ById('KOCAttackImpendingStopAttack').checked;
 			
 			t.options.noViewReports=ById('KOCAttackNoViewReports').checked;
 			
@@ -487,6 +761,24 @@ var KOCAttack={
 		a.id='KOCAttackOptionsLink';
 		a.addEventListener('click',function() {
 			t.ShowOptionsDialog();
+		},false);
+	},
+	
+	AddViewAttacksLink:function() {
+		var t=this;
+		var a=ById('KOCAttackViewAttacksLink');
+		if(a) return;
+
+		a=this.AddTabLink('View Attacks');
+		if(!a) {
+			window.setTimeout(function() {
+				t.AddViewAttacksLink();
+			},t.GetRandTime(250));
+			return;
+		}
+		a.id='KOCAttackViewAttacksLink';
+		a.addEventListener('click',function() {
+			t.ShowViewAttacksDialog();
 		},false);
 	},
 
@@ -934,7 +1226,7 @@ var KOCAttack={
 		}
 		var troops=[];
 		var totalTroops=0;
-		for(var tr=0; tr<100; tr++) {
+		for(var tr=0; tr<20; tr++) {
 			var troop=ById('modal_attack_unit_ipt'+tr);
 			if(!troop) continue;
 			try {
@@ -946,8 +1238,8 @@ var KOCAttack={
 			}
 		}
 		var comment=ById('KocAttackComment');
-		var type=ById('modal_attack_atktype');
-		if(!type) {
+		var marchType = getAttackTypeSelected();	
+		if(marchType==null) {
 			throw("Cannot find attack type");
 		}
 
@@ -957,10 +1249,10 @@ var KOCAttack={
 		}
 
 		// ignore anything other than attack
-		if(type.selectedIndex==0) {
+		if(marchType==0) {
 			var attack=this.GetAttack(x,y);
 			if(!attack) attack={};
-			attack.type=type.selectedIndex;
+			attack.type=marchType;
 			if(comment){ attack.comment=comment.value; }
 			var nowSecs=new Date().getTime()/1000;
 			var SuicideAttackDefined=this.isSuicideAttackDefinedAtLocation(x,y);
@@ -1000,11 +1292,11 @@ var KOCAttack={
 			this.prevAttack={'x':x,'y':y};
 			this.SetAttack(x,y,attack);
 			return attack;
-		} else if(type.selectedIndex==1) {
+		} else if(marchType==1) {
 			// try to parse transports
 			var attack=this.GetAttack(x,y);
 			if(!attack) attack={};
-			attack.type=type.selectedIndex;
+			attack.type=marchType;
 			//attack.ignore=true; // We set this to ignore for now until I can get the auto attack working
 			if(comment)
 				attack.comment=comment.value;
@@ -1165,9 +1457,12 @@ var KOCAttack={
 		}
 		div.innerHTML='';
 		
+		var bulkAddTable=document.createElement('table');
+		bulkAddTable.style.background='transparent';
 		var bulkAddDiv=document.createElement('div');
+		bulkAddTable.insertRow(-1).insertCell(-1).appendChild(bulkAddDiv);
 		bulkAddDiv.style.display='none';
-		AddHtml(bulkAddDiv,"<hr />");
+		//AddHtml(bulkAddDiv,"<hr />");
 		AddHtml(bulkAddDiv,"Copy and paste coords here (ie. 343,434) one on each line...<br />Note: it will only add the target using the current number of troops on this screen.<br /><input id='KOCAttackBulkAddForce' type='checkbox' /> Overwrite existing attack if one already exists<br />");
 
 		
@@ -1235,33 +1530,61 @@ var KOCAttack={
 		bulkAddAttackLink.className='buttonDown20';
 		bulkAddAttackLink.innerHTML='<span>Bulk add coords</span>';
 		bulkAddAttackLink.addEventListener('click',function() { 
-			bulkAddDiv.style.display='inline'; 
-			bulkAddAttackLink.style.display='none'; 
+			if(bulkAddDiv.style.display=='inline')
+				bulkAddDiv.style.display='none'; 
+			else
+				bulkAddDiv.style.display='inline'; 
 		},false);
-		div.appendChild(bulkAddDiv);
 		div.appendChild(bulkAddAttackLink);
+		div.appendChild(bulkAddTable);
 		return div;
 	},
 
+	hideAttackEffortsState : true,
 	HideAttackEfforts:function() {
-		var items=ById('modal_attack_items');
-		if(!items) return;
-		var type=ById('modal_attack_atktype');
-		if(!type) {
-			throw("Cannot find attack type");
+	var t = KOCAttack;
+		if (!ById('modal_attack_march_boost'))
+    return;
+	  var span = document.createElement('span');        
+	  var a = document.createElement('a');    
+	  //var txt = document.createElement('text'); 
+	  a.innerHTML = 'Hide Attack/Speed Boosts';   
+	  //inp.type='checkbox';
+	  span.appendChild (a);
+	  //span.appendChild (txt);
+	  if (t.hideAttackEffortsState){
+		   hideshow ('none');
 		}
-
-
-		//items=items.parentNode.parentNode;
-		var a=document.createElement('a');
-		a.innerHTML='Hide/Show attack efforts';
-		//a.href='javascript:;';
-		a.style.cursor='pointer';
-		items.style.display='none';
-		a.addEventListener('click',function() {
-			items.style.display=items.style.display=='none'?'block':'none';
-		},false);
-		return a;
+		a.addEventListener('click', function(evt) {
+  	  t.hideAttackEffortsState = !t.hideAttackEffortsState;
+  	  hideshow();
+	},false);
+		for (var i=1; i<5; i++)
+			document.getElementById('modal_attack_tab_'+ i).addEventListener ('click', hideshow, false);
+	return span;
+		
+		function hideshow (){
+  	if (t.hideAttackEffortsState)
+  	  disp = 'none';
+  	else
+  	  disp = 'block';
+		ById('modal_attack_march_boost').style.display = disp;	
+		ById('modal_attack_attack_boost').style.display = disp;	
+		ById('modal_attack_defense_boost').style.display = disp;
+		var div = ById('modal_attack_speed_boost');
+		for (var i=0; i<i<div.childNodes.length; i++){
+		  if (div.childNodes[i].className == 'section_title')
+			div.childNodes[i].style.display = disp;
+		  if (div.childNodes[i].className == 'section_content'){
+			div = div.childNodes[i];
+			for (i=0; i<div.childNodes.length; i++){
+			  if (div.childNodes[i].style!=undefined && div.childNodes[i].className!='estimated')
+				div.childNodes[i].style.display = disp;
+			}
+			break;
+		  }  
+		}
+		}
 	},
 
 	SetResourceInput:function(num,resourceCount) {
@@ -1733,7 +2056,7 @@ var KOCAttack={
 				t.SetValuesCache();
 				// we want to keep the scroll bar at the same position, don't redraw
 				//~~~ mmm... need to wait for attack to finish before the numbers will update.
-				t.DrawClosestFarms();
+				//t.DrawClosestFarms();
 			},0);
 		},false);
 		
@@ -1744,10 +2067,7 @@ var KOCAttack={
 		var nowSecs=new Date().getTime()/1000;
 
 		var div=document.createElement('div');
-		div.style.overflow='scroll';
-		div.style.height='280px';
 		AddText(div,'Comment:');
-		div.appendChild(document.createElement('br'));
 		div.appendChild(comment);
 		div.appendChild(document.createElement('br'));
 
@@ -1757,8 +2077,9 @@ var KOCAttack={
 		div2.appendChild(ignore);
 		AddText(div2,'Ignore in the attack list');
 		var nextElement=ById('marchTypeDesc');
-		nextElement.parentNode.insertBefore(div2, nextElement.nextSibling);
+		//nextElement.parentNode.insertBefore(div2, nextElement.nextSibling);
 		//div.appendChild(document.createElement('br'));
+		div.appendChild (div2);
 		
 		var xy=this.GetGuiCoords();
 		var attack=null;
@@ -1771,6 +2092,7 @@ var KOCAttack={
 		var knightSelect=ById('modal_attack_knight')
 		var totalTroops=0;
 		var totalResources=0;
+		 var attackTypeSelected = getAttackTypeSelected ();
 		if(attack) {
 			ignore.checked=attack.ignore?true:false;
 			if(attack.time) {
@@ -1780,9 +2102,8 @@ var KOCAttack={
 				comment.value=attack.comment;
 			}
 			
-			var attackTypeSelect=ById('modal_attack_atktype');
 			// only fill things in if we're in attack mode.
-			if(attackTypeSelect.selectedIndex==0 && attack.type==0) {
+			if(attackTypeSelected==0 && attack.type==0) { // if 'attack' mode
 				if(this.prevAttack) { this.Log('Previous attack:'+this.prevAttack.x+'=='+xy[0] +','+this.prevAttack.y+'=='+xy[1] ); }
 				var firstAttack = this.IsFirstAttackAtLocation(xy[0], xy[1]);
 				this.Log("current attack wave type: "+attack.currenttattackwavetype);
@@ -1810,9 +2131,8 @@ var KOCAttack={
 				}
 
 				//attackTypeSelect.selectedIndex=attack.type;
-				knightSelect.selectedIndex=1+Math.floor(Math.random()*(knightSelect.options.length-1));
-			} else if (attackTypeSelect.selectedIndex==1 && attack.type==1) {
-				attackTypeSelect.selectedIndex=attack.type;
+				//knightSelect.selectedIndex=1+Math.floor(Math.random()*(knightSelect.options.length-1));
+			} else if (attackTypeSelected==1 && attack.type==1) { // else if transport
 				var resourceTypes = new Array(
 					'gold',
 					'rec1',
@@ -1871,21 +2191,19 @@ var KOCAttack={
 			deleteBtn.addEventListener('click',function() {
 				t.DeleteAttack(xy[0],xy[1]);
 				t.DoUnsafeWindow('Modal.hideModalAll();');
-				t.DrawClosestFarms();
 			},false);
 		
-			attackTypeSelect.parentNode.insertBefore(deleteBtn,attackTypeSelect.nextSibling);
+			div.insertBefore (deleteBtn, div.firstChild);
 		} 
 		
 		var ChangeAttack=function() {
 			var xy=t.GetGuiCoords();
 			var attack=null;
-			var attackTypeSelect=ById('modal_attack_atktype');
 			if(xy) {
 				attack=t.GetAttack(xy[0],xy[1]);
 			}
 			if(!attack) attack={};
-			if(attackTypeSelect.selectedIndex!=attack.type) {
+			if(getAttackTypeSelected()!=attack.type) {
 				t.Log('We wont change an attack if the type is different. You must delete the attack to change the type');
 				return;
 			}
@@ -1897,10 +2215,15 @@ var KOCAttack={
 		comment.addEventListener('change',function() { ChangeAttack(); },false);
 		ignore.addEventListener('change',function() { ChangeAttack(); },false);
 		
-		var parentDiv=ById('modal_attack_items');
-		parentDiv.parentNode.insertBefore(div,parentDiv);
-		parentDiv.parentNode.insertBefore(this.HideAttackEfforts(),parentDiv);
-		parentDiv.parentNode.insertBefore(this.BulkAddAttackLink(box),parentDiv);
+		var divContainer = document.createElement ('div');
+		divContainer.style.padding = '0px 12px';
+		divContainer.style.height = '320px';
+		divContainer.style.maxHeight = '320px';
+		divContainer.style.overflowY = 'auto';
+		divContainer.appendChild(this.HideAttackEfforts());	
+		divContainer.appendChild(div);	
+		divContainer.appendChild(this.BulkAddAttackLink(box));
+		document.getElementById ('modal_attack').appendChild(divContainer);
 		
 		this.AttachXYPaste('modal_attack_target_coords_x','modal_attack_target_coords_y');
 		
@@ -1914,9 +2237,7 @@ var KOCAttack={
 			&& knightSelect.options.length>1
 			&& !notFullTroops
 			&& !notFullResources
-
-
-			&& btnMarch.style.opacity!=0.5
+			&& btnMarch.className.indexOf('grey')<0
 			) {
 				this.Log('Auto attack:'+xy[0]+','+xy[1]+', from city:'+this.autoAttackCityUpto);
 				var t=this;
@@ -2623,17 +2944,10 @@ var KOCAttack={
 			if(!attack) throw("Cannot find:"+xy[0]+','+xy[1]);
 			attack.ignore=true;
 			t.SetAttack(xy[0],xy[1],attack);
-			setTimeout(function() {
-				t.DrawClosestFarms();
-			},0);
-			
 		};
 		var DeleteFarm=function(e) {
 			var xy=e.target.parentNode.parentNode.getAttribute('xy').split(',');
 			t.DeleteAttack(xy[0],xy[1]);
-			setTimeout(function() {
-				t.DrawClosestFarms();
-			},0);
 		};
 		
 		var aDone=0;
@@ -3543,24 +3857,30 @@ var KOCAttack={
 	OnImpendingAttack:function() {
 		var t=this;
 		this.Log("impending attack");
+		var autoAttack=this.GetAutoAttack();
 		var url=t.options.impendingAttackUrl;
 		if(url!=undefined && url !="") {
 			GM_openInTab(url);
 		}
+		if(t.options.impendingStopAttack)
+			if(autoAttack)
+				t.ToggleAutoAttack();
 	},
 	CheckImpendingAttack:function() {
 		var r=false;
 		var seed=this.GetSeed();
+		
 		if(seed && seed.queue_atkinc) {
-			var q=0;
-	//		if(unsafeWindow.Object.isArray(seed.queue_atkinc)) {
-				
+		  for(k in seed.queue_atkinc){
+			m = seed.queue_atkinc[k];
+			if (m.marchType==3 || m.marchType==4){ 
+				var q=0;
 				var keys=unsafeWindow.Object.keys(seed.queue_atkinc);
-				if(keys.length>0 && keys.length<16) {
-	//GM_log('impppp'+keys.length);			
-					r=true;
+					if(keys.length>0 && keys.length<16) {		
+						r=true;
+					}
 				}
-	//		}
+			}
 		}
 	//GM_log('imp'+r);	
 		/*
@@ -3666,6 +3986,26 @@ var KOCAttack={
 		});
 		window.alert("All stored attacks for this domain have been deleted.\nClick the ok button to reload.");
 	},
+	DetailAttacks:function() {
+	  var t=this;
+	  
+	  var names=GM_listValues();
+	  var currentServerId = t.GetServerId();
+	  var attackPrefix='attack_'+currentServerId+'_';
+	  for(var n=0; n<names.length; n++) {
+		var name=names[n];
+		var nameI=name.split('_');
+		if(nameI.length<3) continue;
+		var xy=nameI[2].split(',');
+		if(name.substring(0,attackPrefix.length)!=attackPrefix) continue;
+		var value = GM_getValue(name);
+		if(value=="") continue;
+		var attack=JSON2.parse(value);
+		attack.xy=xy;
+		if(!attack) continue;					
+		t.attacks.push(attack);
+	  }
+	},
 	ExportAllToJSON:function() {
 		var names=this.browser_listValues();
 		var obj={};
@@ -3737,17 +4077,16 @@ var KOCAttack={
 		
 		// Determine which page we're on
 		t.DetermineCurrentPage();
-		
 		// Code strictly for page: koc_game
 		if(t.currentPage == "koc_game"){
+		//Check for strange majic error
+		checkStrangeMagic();
 		
 			window.setTimeout(function() {
 				if(!t.pageLoaded && t.GetAutoAttack() && !t.IsMapperRunning()) {
 					GM_log("whoops, game not loaded after 60 secs problem. reloading.");
 					t.SetValuesCache();
-					//window.location.reload(true);
 					t.ReloadWindow();
-					//window.history.go(0);
 				}
 			},t.GetRandTime(60*1000));
 
@@ -3777,7 +4116,6 @@ var KOCAttack={
 		var domTickTimer=null;
 		var domTickUpto=0;
 		var domTick=function(e) {
-			
 			var funcsById={};
 			
 			// Handle cross-iframe commands (which are currently only being used for the domain selection page)
@@ -3810,6 +4148,7 @@ var KOCAttack={
 					// changed city
 					setTimeout(function() {
 						t.AddOptionsLink();
+						t.AddViewAttacksLink();
 						t.DrawClosestFarms();
 					},0);
 					setTimeout(function() {
@@ -3960,10 +4299,6 @@ var KOCAttack={
 };
 
 
-KOCAttack.Listen();
-KOCAttack.SetupClearMessages();
-
-
 function SetupQuickMarchButton(useRetryMarch) {
 /*
 	var retryMarch='var retryMarch=function() { alert("retrying march"); new (Ajax.Request)(g_ajaxpath + "ajax/march.php" + g_ajaxsuffix, {'+
@@ -3981,7 +4316,7 @@ function SetupQuickMarchButton(useRetryMarch) {
 		'}'+
 	'}); };';
 */
-	var retryMarch='var retryMarch=function() { '+
+	var retryMarches='var retryMarch=function() { '+
 		'new (Ajax.Request)(g_ajaxpath + "ajax/march.php" + g_ajaxsuffix, {'+
 		'method: "post",'+
         'parameters: params,'+
@@ -3989,74 +4324,137 @@ function SetupQuickMarchButton(useRetryMarch) {
         'onFailure: function () {  Modal.hideModalAll(); }'+
 	'}); };';
 	if(!useRetryMarch) {
-		retryMarch='var retryMarch=function() { return; };';
+		retryMarches='var retryMarch=function() { return; };';
 	}
 	
 	var modalAttackReplaces=[
 		// *** it says "new Ajax" in the source but firefox converts it to new (Ajax
-		['modal_attack_do','modal_attack_doOld'],
-		['onSuccess:','onSuccess: marchSuccess='],
-//		['Modal.showAlert(printLocalError(','if(rslt.error_code==3 || rslt.error_code==8) { try {retryMarch(); } catch(e) { alert("retry failed:"+e); }  } else { Modal.hideModalAll(); }  Modal.showAlert(printLocalError('],
-		['Modal.showAlert(printLocalError(','if(rslt.error_code==3 || rslt.error_code==8) { try {window.setTimeout(function() { retryMarch(); },(3*1000)); } catch(e) { /*alert("retry failed:"+e);*/ }  } else { Modal.hideModalAll(); }  Modal.showAlert(printLocalError(']
+		[['modal_attack_do','modal_attack_doOld']],
+		[['onSuccess:','onSuccess: marchSuccess=']],
+		[['Modal.showAlert(printLocalError(','if(rslt.error_code==3 || rslt.error_code==8) { try {window.setTimeout(function() { retryMarch(); },(3*1000)); } catch(e) { alert("retry failed:"+e); }  } else { Modal.hideModalAll(); }  Modal.showAlert(printLocalError(']]
 	];
-	
 	
 	var attack_generatequeueReplaces=[
-		['attack_generatequeue','attack_generatequeueOld'],
-		['class=\\"army\\">" + g_js_strings.commonstr.army + ": "','style=\\"width: 145px !important\\" class=\\"army\\">"'],
-		['class=\\"name','style=\\"width: 0px !important; display: none;\\" class=\\"name'],
-    ['var r = 0;','var r = "K:"+seed.knights["city" + currentcityid]["knt" + t].combat+", "; '],
-    ['r += parseInt','var xxx = parseInt'],
-    ['"Count"]);' , '"Count"]); if(xxx>0) { var uname=unitcost["unt"+p][0]; r+=uname[0]+uname[uname.length-1]+":"+xxx+", "; } '],
+		[['attack_generatequeue','attack_generatequeueOld']],
+		[
+			['class=\\"army\\">" + g_js_strings.commonstr.army + ": "','style=\\"width: 145px !important\\" class=\\"army\\">"'],
+			['class=\\"army\\">" + g_js_strings.commonstr.army + ": <span>"','style=\\"width: 145px !important\\" class=\\"army\\"><span style=\'display: inline\'>"']
+		],
+		[['class=\\"name','style=\\"width: 0px !important; display: none;\\" class=\\"name']],
 		//[/123/g,'100']
 	];
-	
+	var attack_generatequeueReplacesU=[
+		[['var u = 0;','var u = "K:"+seed.knights["city" + currentcityid]["knt" + q].combat+", "; ']],
+		[['u += parseInt','var x = parseInt']],
+		[['"Count"]);','"Count"]); if(x>0) { var uname=unitcost["unt"+r][0]; u+=uname[0]+uname[uname.length-1]+":"+x+", "; } ']],
+	];
+	var attack_generatequeueReplacesR=[
+		[['var r = 0;','var r = "K:"+seed.knights["city" + currentcityid]["knt" + t].combat+", "; ']],
+		[['r += parseInt','var x = parseInt']],
+		[['"Count"]);','"Count"]); if(x>0) { var uname=unitcost["unt"+p][0]; r+=uname[0]+uname[uname.length-1]+":"+x+", "; } ']],
+	];
+	var attack_generatequeueReplacesS=[
+		[['var s = 0;','var s = "K:"+seed.knights["city" + currentcityid]["knt" + u].combat+", "; ']],
+		[['s += parseInt','var x = parseInt']],
+		[['"Count"]);','"Count"]); if(x>0) { var uname=unitcost["unt"+q][0]; s+=uname[0]+uname[uname.length-1]+":"+x+", "; } ']],
+	];
+
+/*****	
 	if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1) {
-		modalAttackReplaces.push(['new Ajax',"var marchSuccess=null; "+retryMarch+
+		modalAttackReplaces.push([['new Ajax',"var marchSuccess=null; "+retryMarch+
 			(useRetryMarch?"":" Modal.hideModalAll(); ")+
-			"\nnew Ajax"]);
+			"\nnew Ajax"]]);
 	} else {
-		modalAttackReplaces.push(['new (Ajax',"var marchSuccess=null; "+retryMarch+
+		modalAttackReplaces.push([['new (Ajax',"var marchSuccess=null; "+retryMarch+
 			(useRetryMarch?"":" Modal.hideModalAll(); ")+
-			"\nnew (Ajax"]);
+			"\nnew (Ajax"]]);
 	}
+*****/
+	// modalAttackReplaces.push([['ajax.Request',   "var marchSuccess=null; "+retryMarch+
+		// (useRetryMarch?"":" Modal.hideModalAll(); ")+	"\najax.Request"]]);
 
 	if(!useRetryMarch) modalAttackReplaces.push(['Modal.hideModalAll();','']);
+	
 	var replaceFunc=function(name,replaces) {
 		var modalAttackFunc=window[name].toString();
 		var nameOld=name+'Old';
+		var foundFailed=false;
 		for(var a=0; a<replaces.length; a++) {
-			var repI=replaces[a];
 			var found=false;
-			if(typeof(repI[0])=="object") {
-				found=repI[0].exec(modalAttackFunc)?true:false;
-			} else {
-				found=modalAttackFunc.indexOf(repI[0])>=0?true:false;
+			var repArr=replaces[a];
+			for(var ra=0; ra<repArr.length; ra++) {
+				var repI=repArr[ra];
+				if(typeof(repI[0])=="object") {
+					found=repI[0].exec(modalAttackFunc)?true:false;
+				} else {
+					found=modalAttackFunc.indexOf(repI[0])>=0?true:false;
+				}
+				if(found) break;
 			}
 			if(!found) {
-				//alert("modalAttackReplace: cannot find: "+repI[0]+','+modalAttackFunc);
+		//Disable error message that appears in some newer domains. But wouldn't know if other servers are updated!!
+				// var err="modalAttackReplace: cannot find: "+repI[0]+','+modalAttackFunc;
+				// var sp=document.createElement('span');
+				// sp.style.color='#ccc';
+				// sp.appendChild(document.createTextNode(err));
+				// document.body.insertBefore(sp,document.body.childNodes[0]);
+				foundFailed=true;
+				break;
 			}
 			
 			modalAttackFunc=modalAttackFunc.replace(repI[0],repI[1]);
 		}
+		if(foundFailed) return;
 
 		try {
 			window[nameOld]=eval(modalAttackFunc);
-//alert(window[nameOld].toString());			
+//alert(window[nameOld].toString());		
 		} catch(e) {
-			//alert(e+', bad func:'+modalAttackFunc);
+			alert(e+', bad func:'+modalAttackFunc);
 		}
 
-		window[name]=function() {
+		window[name]=function(e) {
 			// let our stuff in addListener run first.
 			window.setTimeout(function() {
-				eval(nameOld+'();');
+				eval(nameOld+'(e);');
 			},100);
 		}
 	};
 	
+	var attackFuncStr=window['modal_attack_do'].toString();
+	if(attackFuncStr.indexOf('ajax.Request')<0) {
+		modalAttackReplaces.push([
+			['new (Ajax',"var marchSuccess=null; "+retryMarches+
+			(useRetryMarch?"":" Modal.hideModalAll(); ")+
+			"\nnew (Ajax"],
+			['new Ajax',"var marchSuccess=null; "+retryMarches+
+			(useRetryMarch?"":" Modal.hideModalAll(); ")+
+			"\nnew Ajax"],
+			['ajax.Request',"var marchSuccess=null; "+retryMarches+
+			(useRetryMarch?"":" Modal.hideModalAll(); ")+
+			"\najax.Request"]
+		]);
+	}
 	replaceFunc('modal_attack_do',modalAttackReplaces);
-	replaceFunc('attack_generatequeue',attack_generatequeueReplaces);
+	function AddArray(to,from) {
+		for(var c=0; c<from.length; c++) { to.push(from[c]); }
+	}
+	
+	var arr=[];
+	AddArray(arr,attack_generatequeueReplaces);
+	var funcStr=window['attack_generatequeue'].toString();
+	if(funcStr.indexOf('var u = 0')>=0) {
+		AddArray(arr,attack_generatequeueReplacesU);
+	} else if(funcStr.indexOf('var r = 0')>=0) {
+		AddArray(arr,attack_generatequeueReplacesR);
+	} else if(funcStr.indexOf('var s = 0')>=0) {
+		AddArray(arr,attack_generatequeueReplacesS);
+	} else {
+		GM_log("Unknown attack queue func: "+location.href+"\n"+funcStr);
+	}
+	replaceFunc('attack_generatequeue',arr);
+
+	replaceFunc('modal_attack_update_num',modalAttackUpdateNumReplaces);
 
 /* BAD: updateSeed.php doesn't return cityUnits
     var params = Object.clone(g_ajaxparams);
@@ -4143,4 +4541,91 @@ function SetupScripts() {
 	document.body.appendChild(scr);
 }
 
-SetupScripts();
+/******************* Anti-anticheat measures ******************/
+var mixpanelRemoved=false;
+function DisableMixpanel() {
+	if(unsafeWindow.cm) {
+		unsafeWindow.cm.MixPanelTracker.track=function() { };
+	}
+	if(unsafeWindow.MixpanelLib) {
+		unsafeWindow.MixpanelLib.prototype={
+			register:function() { },
+			track:function(t) {
+			}
+		};
+	}
+	if(!unsafeWindow.cm || !unsafeWindow.MixpanelLib) {
+		window.setTimeout(function() {
+			DisableMixpanel();
+		},100);
+	} else {
+		GM_log('Mixpanel removed');
+		mixpanelRemoved=true;
+	}
+}
+
+
+
+/******************* Check strange majic error ******************/
+function checkStrangeMagic (){
+GM_log("Check strange majic");
+ if (!document.getElementById("kochead")){
+    popup (100,100,500,275, "<BR><CENTER>checkStrangeMajik <BR><BR>KofC NOT FOUND<BR>Refreshing in 5 seconds ...<BR><BR>");
+    window.setTimeout ( function() { GM_log ("checkStrangeMajik REloading..."); KOCAttack.ReloadWindow(); }, 5000);
+  }  
+}
+
+function popup (left, top, width, height, content){
+   var div = document.createElement('div');
+   if (width)
+       div.style.width = width;
+   if (height) 
+       div.style.height = height;
+   if (left || top) {
+       div.style.position = "relative";
+       if (left)
+           div.style.left = left;
+       if (top)
+           div.style.top = top;
+   }
+   if (content)
+       div.innerHTML = content;
+       
+  div.style.background = "#ffc";
+  div.style.border = "2px solid #000";
+  div.style.zIndex = "999999";        // KOC modal is 100210 ?
+  div.style.display = 'block';
+  window.document.body.insertBefore(div, window.document.body.childNodes[0]);
+  return div;
+}
+
+/******************* Function calls ******************/
+KOCAttack.Listen();
+DisableMixpanel();
+unsafeWindow.cm.cheatDetector={
+detect:function() { }
+};
+if(location.href.indexOf('apps.facebook.com/kingdomsofcamelot/')>=0) {
+	window.setTimeout(function() {
+		
+	},10000);
+} else {
+	StartAll();
+}
+var startAllTimeout=null;
+function StartAll() {
+	var now=new Date().getTime();
+	if(startAllTimeout==null) {
+		startAllTimeout=now+5000;
+	}
+	if(mixpanelRemoved || startAllTimeout<now) {
+		if(startAllTimeout<now) {
+			GM_log("Did not remove mixpanel, starting anyways");
+		}
+		KOCAttack.SetupClearMessages();
+
+		SetupScripts();
+	} else {
+		window.setTimeout(function() { StartAll(); },200);
+	}
+}
