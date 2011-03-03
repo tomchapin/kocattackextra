@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.8.5.3
+// @version          0.8.5.4
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.8.5.3';
+var KOCAversion = '0.8.5.4';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -975,14 +975,14 @@ var KOCAttack={
 		}
 	*/			
 		t.SetAttackStatusMessage();
+		t.Log("setting attack toggle message");
 	},
 
 	SetAttackStatusMessage:function() {
 		//var mess=this.GetStatusMessage();
+		var t=this;
 		var toggle=ById('KOCAttackToggle');
-
 		if(!toggle) {
-			var t=this;
 			toggle=this.AddTabLink('Auto Attack');
 			if(!toggle) {
 				window.setTimeout(function() {
@@ -2946,8 +2946,8 @@ var KOCAttack={
 		return false;
 	},
 	GetAutoAttack:function() {
-		var aStr=this.GetValue('AutoAttack','');
-		//var aStr=GM_getValue('AutoAttack_'+this.GetServerId(),'');
+		//var aStr=this.GetValue('AutoAttack','');
+		var aStr=GM_getValue('AutoAttack_'+this.GetServerId(),'');
 		if(aStr=='') {
 			return null;
 		}
@@ -2960,12 +2960,12 @@ var KOCAttack={
 	},
 	SetAutoAttack:function(s) {
 		if(s==null) {
-			this.SetValue('AutoAttack','');
-			//GM_setValue('AutoAttack_'+this.GetServerId(),'');
+			//this.SetValue('AutoAttack','');
+			GM_setValue('AutoAttack_'+this.GetServerId(),'');
 			return;
 		} 
-		this.SetValue('AutoAttack',JSON2.stringify(s));
-		//GM_setValue('AutoAttack_'+this.GetServerId(),JSON.stringify(s));
+		//this.SetValue('AutoAttack',JSON2.stringify(s));
+		GM_setValue('AutoAttack_'+this.GetServerId(),JSON.stringify(s));
 	},
 	ResetAutoAttackTarget:function() {
 		var autoAttack=this.GetAutoAttack();
