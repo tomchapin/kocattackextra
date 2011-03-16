@@ -1545,6 +1545,10 @@ var KOCAttack={
 			var attack=this.GetAttack(x,y);
 			
 			var currenttattackwavetype = "bulkadded";
+			if(locationType=="Transport"){
+				locationType = "";
+				currenttattackwavetype = "transport";
+			}
 			var SuicideAttackDefined=this.isSuicideAttackDefinedAtLocation(x,y);
 			var previous_suicidewave = undefined;
 			if(attack && (SuicideAttackDefined || isSuicideWave)){
@@ -2384,7 +2388,7 @@ var KOCAttack={
 			this.SetAutoAttack(autoAttack);
 
 			if(totalTroops>0 
-			&& knightSelect.options.length>1
+			&& (knightSelect.options.length>1 || attackTypeSelected==1)//If transport you don't need knights(Thanks to shalm for pointing that out)
 			&& !notFullTroops
 			&& !notFullResources
 			&& btnMarch.className.indexOf('grey')<0
