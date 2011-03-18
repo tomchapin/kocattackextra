@@ -4823,8 +4823,8 @@ function DisableMixpanel() {
 function checkStrangeMagic (){
 GM_log("Check strange majic");
  if (!document.getElementById("kochead")){
+	window.setTimeout ( function() { GM_log ("checkStrangeMajik REloading..."); KOCAttack.ReloadWindow(); }, 5000);
     popup (100,100,500,275, "<BR><CENTER>checkStrangeMajik <BR><BR>KofC NOT FOUND<BR>Refreshing in 5 seconds ...<BR><BR>");
-    window.setTimeout ( function() { GM_log ("checkStrangeMajik REloading..."); KOCAttack.ReloadWindow(); }, 5000);
   }  
 }
 
@@ -4848,7 +4848,7 @@ function popup (left, top, width, height, content){
   div.style.border = "2px solid #000";
   div.style.zIndex = "999999";        // KOC modal is 100210 ?
   div.style.display = 'block';
-  document.body.appendChild(div);
+  window.document.body.insertBefore(div, window.document.body.childNodes[0]);
   return div;
 }
 
