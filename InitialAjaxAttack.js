@@ -217,8 +217,7 @@ function AjaxRequest (url, opts){
 		}
 		ajax.send (a.join ('&'));
 	} else {
-			ajax.send();
-		}
+		ajax.send();
 	}
   
 }   
