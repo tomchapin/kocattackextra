@@ -9,7 +9,7 @@
 // @include          *kingdomsofcamelot.com/*main_src.php*
 // @include          *kingdomsofcamelot.com/*newgame_src.php*
 // @include          *facebook.com/connect/uiserver.php*
-// @include			 *kingdomsofcamelot.com/*standAlone.php*
+// @include          *kingdomsofcamelot.com/*standAlone.php*
 
 // @require          http://sizzlemctwizzle.com/updater.php?id=89473
 // ==/UserScript==
