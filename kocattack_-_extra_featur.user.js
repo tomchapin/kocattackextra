@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.2
+// @version          0.9.3
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.2';
+var KOCAversion = '0.9.3';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -425,10 +425,10 @@ var KOCAttack={
 		<a id="KOCAttackViewAttacksList" class="button20"><span>List Attacks</span></a>\
 		<a id="KOCAttackViewAttacksClearList" class="button20"><span>Clear List</span></a>\
 		<a id="KOCAttackViewAttacksDelete" class="button20"><span>Delete Selected</span></a>\
-		<a id="KOCAttackViewAttacksIgnore" class="button20"><span>Ignore/UnIgnore</span></a>\
-		<a id="KOCAttackViewAttacksImportExport" class="button20"><span>Import / Export</span></a>\
 		<br><br><DIV id="srcAttackResults" style="height:470px; max-height:470px; overflow-y:auto;"></div>\
 		';
+		
+		//<a id="KOCAttackViewAttacksImportExport" class="button20"><span>Import / Export</span></a>\	
 		
 		var srcAttackResults = ById("srcAttackResults");
 		if (srcAttackResults != null){
@@ -447,9 +447,9 @@ var KOCAttack={
 			div.style.display='none';
 		},false);
 		
-		ById('KOCAttackViewAttacksImportExport').addEventListener('click',function() {
-			t.ShowImportExportBox();
-		},false);
+		//ById('KOCAttackViewAttacksImportExport').addEventListener('click',function() {
+		//	t.ShowImportExportBox();
+		//},false);
 				
 		ById('KOCAttackViewAttacksList').addEventListener('click',function() {
 		  t.attacks=[];
@@ -463,7 +463,7 @@ var KOCAttack={
 		  
 		  var h = '<table>';
 		  h += '<tr><td><input type=checkbox id=selAllAttacks></td><td>&nbsp;</td><td>City</td><td>Coords</td><td nowrap>What</td>';
-		  h += '<td>Type</td><td>Attack Troops</td><td>Suicide Troops/Resources</td><td>Time</td><td>Ignore</td></tr>';
+		  h += '<td>Type</td><td>Attack Troops</td><td>Suicide Troops/Resources</td><td>Dist</td><td>Time</td><td>Ignore</td></tr>';
 		  var tableRows= '';
 		  var count = 1
 		  for(var a=0; a<t.attacks.length; a++) {
@@ -544,6 +544,10 @@ var KOCAttack={
 			  tableRows += '&nbsp;';
 			}
       tableRows += '</td>';
+      
+ 	  var distance=t.CalcXYDist({'x':t.attacks[a].xy[0],'y':t.attacks[a].xy[0]},{'x':t.GetCityCoordsX(t.attacks[a]['fromCity']),'y':t.GetCityCoordsX(t.attacks[a]['fromCity'])});
+	  tableRows += '<td>'+parseInt(distance)+'</td>';
+	  
 			var nowSecs=new Date().getTime()/1000;
 			tableRows += '<td>'+SecsToStr(nowSecs-t.attacks[a].time)+'</td>';
 			
@@ -616,11 +620,11 @@ var KOCAttack={
 	},
 	
 	ChangeIgnore:function(e){
-	  var c = ById('coords'+e.target.id).innerHTML;
+	  var c = ById('aacoords'+e.target.id).innerHTML;
 	  var xy = c.split(",");
-	  var serverID = this.GetServerId();
+	  var serverID = KOCAttack.GetServerId();
 	  	  
-	  var attackname = 'attack_'+ServerId+'_'+xy[0]+','+xy[1];
+	  var attackname = 'attack_'+serverID+'_'+xy[0]+','+xy[1];
 	  var str = GM_getValue(attackname,'') 
 
 	  if(!str) return null;
@@ -645,7 +649,27 @@ var KOCAttack={
 	  }
 	  return cityName;
 	},	
-	
+
+	GetCityCoordsX:function(cityid) {  
+	  var cityName;
+	  for(var a=0; a<unsafeWindow.seed.cities.length; a++) {
+	    if(unsafeWindow.seed.cities[a][0] == cityid){
+		  var x = unsafeWindow.seed.cities[a][2];
+		}
+	  }
+	  return x;
+	},	
+
+	GetCityCoordsY:function(cityid) {  
+	  var cityName;
+	  for(var a=0; a<unsafeWindow.seed.cities.length; a++) {
+	    if(unsafeWindow.seed.cities[a][0] == cityid){
+		  var y = unsafeWindow.seed.cities[a][3];
+		}
+	  }
+	  return y;
+	},	
+				
 	ReloadWindow:function() {
 		var m=/^[a-zA-Z]+([0-9]+)\./.exec(document.location.hostname);
 		if (!m){
