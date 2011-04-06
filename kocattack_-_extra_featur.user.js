@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.3
+// @version          0.9.3.2
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.3';
+var KOCAversion = '0.9.3.2';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -4192,7 +4192,7 @@ var KOCAttack={
 				numInp.value=Math.floor(parseInt(maxObj.textContent)*0.9);
 				var t=this;
 				window.setTimeout(function() {
-					if(numInp.value>maxObj.textContent) {
+					if(numInp.value>parseInt(maxObj.textContent)) {
 						t.Log('Not training troops:'+numInp.value+'>'+maxObj.textContent);
 						return;
 					}
