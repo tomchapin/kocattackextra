@@ -1328,7 +1328,7 @@ var KOCAttack={
 		}
 		*/
 
-		this.Log("Troops are not currently marching to (x,y) in the troop activity. This is the first attack.");
+		this.Log("Troops are not currently marching to ("+x+","+y+") in the troop activity. This is the first attack.");
 		return true;
 	},
 
