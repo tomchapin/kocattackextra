@@ -725,7 +725,7 @@ var KOCAttack={
 			"Attacking wilderness:<input id='KOCAttackHoursSinceLastWild' value='"+(this.options.attackSecsSinceLastWild/(60*60))+"' size='3' />hrs<br />"+
 			" Attacking city:<input id='KOCAttackHoursSinceLastCity' value='"+(this.options.attackSecsSinceLastCity/(60*60))+"' size='3' />hrs<br />"+
 			" Transporting:<input id='KOCAttackMinsSinceLastTransport' value='"+(this.options.attackSecsSinceLastTransport/(60))+"' size='3' />mins<br />"+
-			" If transporting, try to keep at least <input id='KOCAttackTransportReserveAmount' value='"+this.options.transportsReserveAmount+"' size='10' /> of each resource in each city <font color=#FF0000>(NEW)</font>"+
+			" If transporting, try to keep at least <input id='KOCAttackTransportReserveAmount' value='"+this.options.transportResourcesReserveAmount+"' size='10' /> of each resource in each city <font color=#FF0000>(NEW)</font>"+
 			"</div>"+
 			"<br />"+
 			"<input id='KOCAttackMaxDistance' value='"+(this.options.attackMaxDistance)+"' size='3' /> max distance away from city to attack.<br />"+
@@ -876,7 +876,7 @@ var KOCAttack={
 			t.options.attackSecsSinceLastCity=parseFloat(ById('KOCAttackHoursSinceLastCity').value)*60*60;
 			t.options.attackSecsSinceLastTransport=parseFloat(ById('KOCAttackMinsSinceLastTransport').value)*60;
 			
-			t.options.transportsReserveAmount=parseInt(ById('KOCAttackTransportReserveAmount').value);
+			t.options.transportResourcesReserveAmount=parseInt(ById('KOCAttackTransportReserveAmount').value);
 			
 			t.options.randomPercent=parseFloat(ById('KOCAttackRandom').value);
 			t.options.attackMaxDistance=parseFloat(ById('KOCAttackMaxDistance').value);
@@ -1211,7 +1211,7 @@ var KOCAttack={
 			"attackSecsSinceLastCamp":3600,
 			"attackSecsSinceLastWild":3600,
 			"attackSecsSinceLastTransport":60,
-			"transportsReserveAmount":1000000,
+			"transportResourcesReserveAmount":1000000,
 			"randomPercent":10,
 			"keepReports":10,
 			"attackMaxDistance":60,
@@ -2986,7 +2986,7 @@ var KOCAttack={
 	IsEnoughResources:function(currentResources,neededResources) {
 		for(var t=0; t<neededResources.length; t++) {
 			if(!neededResources[t]) continue;
-			if((parseInt(neededResources[t])+(parseInt(this.options.transportsReserveAmount))>parseInt(currentResources[t])) {
+			if((parseInt(neededResources[t])+parseInt(this.options.transportResourcesReserveAmount))>parseInt(currentResources[t])) {
 				return false;
 			}
 		}
