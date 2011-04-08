@@ -728,7 +728,7 @@ var KOCAttack={
 			" If transporting, try to keep at least <input id='KOCAttackTransportReserveAmount' value='"+this.options.transportResourcesReserveAmount+"' size='10' /> of each resource in each city <font color=#FF0000>(NEW)</font>"+
 			"</div>"+
 			"<br />"+
-			"<input id='KOCAttackMaxDistance' value='"+(this.options.attackMaxDistance)+"' size='3' /> max distance away from city to attack.<br />"+
+			"<input id='KOCAttackMaxDistance' value='"+(this.options.attackMaxDistance)+"' size='3' /> max distance away from city to attack/transport.<br />"+
 			"<input id='KOCAttackLockAttackFromCity' type='checkbox' "+(this.options.lockAttackFromCity?'checked':'')+" /> Only launch attacks from city they were first launched from.<br />"+
 			"<input id='KOCAttackUnselectKnight' type='checkbox' "+(this.options.knightreset?'checked':'')+" /> Deselect knight when not in attack mode.<br />"+
 			"<input id='KOCAttackRetryMarch' type='checkbox' "+(this.options.retryMarch?'checked':'')+" /> Retry march if it has unknown/excess traffic error (press reload after changing this option).<br />"+
