@@ -3407,7 +3407,7 @@ var KOCAttack={
 	GetCurrentMapCoord:function() {
 		// Check to see if we are on map screen
 		var mapbutton = ById('mod_views_map');
-		if(mapbutton && mapbutton.className='sel'){
+		if(mapbutton && mapbutton.className=='sel'){
 			// Return xy values from form inputs
 			var xcoord=ById('mapXCoor');
 			var ycoord=ById('mapYCoor');
