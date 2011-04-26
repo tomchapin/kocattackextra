@@ -5427,35 +5427,35 @@ function checkWhiteScreen (){
 		GM_log("Check iFrame");
 		var checknumber = 0;
 		function checkiFrame() {
-		var iFrame = null;
-		var d = document.getElementById('app_content_130402594779');
-		if(d){
-			var e = d.firstChild.firstChild;
-			for (var c=0; c<e.childNodes.length; c++){
-			  if (e.childNodes[c].tagName=='SPAN' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
-				iFrame = e.childNodes[c].firstChild; 
-				break;
+			var iFrame = null;
+			var d = document.getElementById('app_content_130402594779');
+			if(d){
+				var e = d.firstChild.firstChild;
+				for (var c=0; c<e.childNodes.length; c++){
+				  if (e.childNodes[c].tagName=='SPAN' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
+					iFrame = e.childNodes[c].firstChild; 
+					break;
+				  }
+				}
+			}
+			if (!iFrame){
+			  var iframes = document.getElementsByTagName('iframe');
+			  for (var i=0; i<iframes.length; i++){
+				if (iframes[i].className=='canvas_iframe_util'){
+				  iFrame = iframes[i];
+				  break; 
+				}
 			  }
 			}
-		}
-		if (!iFrame){
-		  var iframes = document.getElementsByTagName('iframe');
-		  for (var i=0; i<iframes.length; i++){
-			if (iframes[i].className=='canvas_iframe_util'){
-			  iFrame = iframes[i];
-			  break; 
+			if (!iFrame && checknumber<10){
+			  setTimeout (checkiFrame, 1000);
+			  checknumber++;
+			  return;
+			} else if (checknumber>=10){
+				KOCAttack.ReloadWindow();
+				GM_log("White screen error. Refreshing.....");
 			}
-		  }
-		}
-		if (!iFrame && checknumber<10){
-		  setTimeout (checkiFrame, 1000);
-		  checknumber++;
-		  return;
-		} else if (checknumber>=10){
-			KOCAttack.ReloadWindow();
-			GM_log("White screen error. Refreshing.....");
-		}
-		return;
+			return;
 		}
 		checkiFrame();
 	},10000);
