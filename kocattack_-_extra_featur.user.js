@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.5.7
+// @version          0.9.5.8
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.5.7';
+var KOCAversion = '0.9.5.8';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -5428,14 +5428,11 @@ function checkWhiteScreen (){
 		var checknumber = 0;
 		function checkiFrame() {
 			var iFrame = null;
-			var d = document.getElementById('app_content_130402594779');
-			if(d){
-				var e = d.firstChild.firstChild;
-				for (var c=0; c<e.childNodes.length; c++){
-				  if (e.childNodes[c].tagName=='SPAN' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
+			var e = document.getElementById('app_content_130402594779').firstChild.firstChild;
+			for (var c=0; c<e.childNodes.length; c++){
+				if (e.childNodes[c].tagName=='SPAN' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
 					iFrame = e.childNodes[c].firstChild; 
 					break;
-				  }
 				}
 			}
 			if (!iFrame){
@@ -5461,11 +5458,11 @@ function checkWhiteScreen (){
 	},10000);
 }
 function checkStrangeMagic (){
-GM_log("Check strange majic");
- if (!document.getElementById("kochead")){
-	window.setTimeout ( function() { GM_log ("checkStrangeMajik REloading..."); KOCAttack.ReloadWindow(); }, 5000);
-    popup (100,100,500,275, "<BR><CENTER>checkStrangeMajik <BR><BR>KofC NOT FOUND<BR>Refreshing in 5 seconds ...<BR><BR>");
-  }  
+	GM_log("Check strange majic");
+	if (!document.getElementById("kochead")){
+		window.setTimeout ( function() { GM_log ("checkStrangeMajik REloading..."); KOCAttack.ReloadWindow(); }, 5000);
+		popup (100,100,500,275, "<BR><CENTER>checkStrangeMajik <BR><BR>KofC NOT FOUND<BR>Refreshing in 5 seconds ...<BR><BR>");
+	}  
 }
 
 function popup (left, top, width, height, content){
