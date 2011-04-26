@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.5.5
+// @version          0.9.5.6
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.5.5';
+var KOCAversion = '0.9.5.6';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -3405,13 +3405,24 @@ var KOCAttack={
 	},
 
 	GetCurrentMapCoord:function() {
-	var cities=this.GetSeed().cities;	
-	  for(i=0; i<cities.length; i++){
-		if(cities[i][0]==unsafeWindow.currentcityid){
-			return {'x':cities[i][2],'y':cities[i][3]};
-			break;
+		// Check to see if we are on map screen
+		var mapbutton = ById('mod_views_map');
+		if(mapbutton && mapbutton.className='sel'){
+			// Return xy values from form inputs
+			var xcoord=ById('mapXCoor');
+			var ycoord=ById('mapYCoor');
+			if(xcoord && ycoord){
+				return {'x':xcoord.value,'y':ycoord.value};
+			}
 		}
-	  }
+		// Not on map screen. Return coordinates of current city
+		var cities=this.GetSeed().cities;	
+		for(i=0; i<cities.length; i++){
+			if(cities[i][0]==unsafeWindow.currentcityid){
+				return {'x':cities[i][2],'y':cities[i][3]};
+				break;
+			}
+		}
 	},
 
 	hrsInput:null,
