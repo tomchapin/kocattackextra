@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.5.8
+// @version          0.9.6.0
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.5.8';
+var KOCAversion = '0.9.6.0';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -709,6 +709,13 @@ var KOCAttack={
 		}
 		okCitiesHtml+='</span>';
 		
+		var attackfirst = '';
+		var arrData = [["Camp", "Camps"],["City", "City"],["Transport", "Transport"],["Wilderness", "Wildernesses"],["None", "None"]];
+		for (var i=0; i < arrData.length; i++){
+			attackfirst += "<input type=radio name=KOCAttackPriority id='KOCAttackPriority_"+arrData[i][0]+"' value="+arrData[i][0]+" "+(arrData[i][0]==this.options.attackpriority?'checked':'')+"/>";
+			attackfirst += "<label for='KOCAttackPriority_"+arrData[i][0]+"'>"+arrData[i][1]+"</label>";
+		};
+		
 		div.style.display='block';
 		div.innerHTML='';
 		this.options=this.GetOptions();
@@ -719,7 +726,8 @@ var KOCAttack={
 			"<input type='checkbox' "+(this.options.attackTypeWild?'checked':'')+" id='KOCAttackTypeWild'>Wilderness "+
 			"<input type='checkbox' "+(this.options.attackTypeCity?'checked':'')+" id='KOCAttackTypeCity'>City "+
 			"<input type='checkbox' "+(this.options.attackTypeTransport?'checked':'')+" id='KOCAttackTypeTransport'>Transport<br> "+
-			"<br />"+
+			"Prioritise attacks for : "+attackfirst+
+			"<br><br />"+
 			"<input id='KOCAttackDelay' value='"+this.options.attackDelay+"' size='3' /> seconds inbetween sending each attack<br />"+
 			"Time inbetween sending to the <u>same target</u>...<br />"+
 			"<div style='margin-left: 40px'>"+
@@ -853,6 +861,16 @@ var KOCAttack={
 			t.options.attackTypeCity=ById('KOCAttackTypeCity').checked;
 			t.options.attackTypeWild=ById('KOCAttackTypeWild').checked;
 			t.options.attackTypeTransport=ById('KOCAttackTypeTransport').checked;
+			
+			var attackpriority = ByName('KOCAttackPriority');
+				if(attackpriority){
+					for(var i = 0; i < attackpriority.length; i++) {
+						if(attackpriority[i].checked) {
+							t.options.attackpriority = attackpriority[i].value;
+							break;
+						}
+					}
+				}
 			
 			t.options.attackDelay=parseInt(ById('KOCAttackDelay').value);
 			t.options.waitAfterCitiesDone=parseInt(ById('KOCAttackCitiesDelay').value);
@@ -1211,6 +1229,7 @@ var KOCAttack={
 		var defOptions={"attackDelay":15,
 			"attackTypeCamp":true,
 			"attackOrder":"closest",
+			"attackpriority":"None",
 			"autoRemoveReports":true,
 			"attackSecsSinceLastCity":60*60*12,
 			"attackSecsSinceLastCamp":3600,
@@ -3153,7 +3172,8 @@ var KOCAttack={
 		}
 		return attackDelay;
 	},
-
+	
+	priorityattack:true,
 	FindBiggestCampAttack:function(attacks,currentTroops,currentResources) {
 		var bestAttack=null;
 		var bestAttackSize=0;
@@ -3355,14 +3375,26 @@ var KOCAttack={
 				}
 				if(bestAttackDist>attack.dist) {  
 					ok=1;  
-					bestAttackDist=attack.dist; 
 				}
 			}
-			if(ok) {
+			
+			if((this.options.attackpriority == levelInfo.type || this.options.attackpriority == 'None') && ok && this.priorityattack){
 				bestAttack=attack;
 				bestAttack.type=attack.a.type;
 				bestAttackSize=armySize;
+				bestAttackDist=attack.dist; 
+			} else if (!this.priorityattack && ok) {
+				bestAttack=attack;
+				bestAttack.type=attack.a.type;
+				bestAttackSize=armySize;
+				bestAttackDist=attack.dist; 
 			}
+		}
+		if(bestAttack == null && this.priorityattack){
+			this.priorityattack = false;
+			bestAttack = this.FindBiggestCampAttack(attacks,currentTroops,currentResources);
+		} else {
+			this.priorityattack = true;
 		}
 		return bestAttack;
 	},
@@ -4893,6 +4925,10 @@ var KOCAttack={
 			}
 		
 		} // End of code strictly for page: koc_game
+		
+		if(t.currentPage == 'app_page'){
+			setTimeout(function(){checkWhiteScreen();},10000);
+		}
 
 		var domTickTimer=null;
 		var domTickUpto=0;
@@ -5423,39 +5459,39 @@ function DisableMixpanel() {
 
 /******************* Check strange majic error ******************/
 function checkWhiteScreen (){
-	window.setTimeout(function() {
-		GM_log("Check iFrame");
-		var checknumber = 0;
-		function checkiFrame() {
-			var iFrame = null;
-			var e = document.getElementById('app_content_130402594779').firstChild.firstChild;
+	GM_log("Check iFrame");
+	var checknumber = 0;
+	function checkiFrame() {
+		var iFrame = null;
+		var e = document.getElementById('app_content_130402594779').firstChild.firstChild;
+		if(e){
 			for (var c=0; c<e.childNodes.length; c++){
-				if (e.childNodes[c].tagName=='SPAN' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
+				if (e.childNodes[c].tagName=='DIV' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
 					iFrame = e.childNodes[c].firstChild; 
 					break;
 				}
 			}
-			if (!iFrame){
-			  var iframes = document.getElementsByTagName('iframe');
-			  for (var i=0; i<iframes.length; i++){
-				if (iframes[i].className=='canvas_iframe_util'){
-				  iFrame = iframes[i];
-				  break; 
-				}
-			  }
-			}
-			if (!iFrame && checknumber<10){
-			  setTimeout (checkiFrame, 1000);
-			  checknumber++;
-			  return;
-			} else if (checknumber>=10){
-				KOCAttack.ReloadWindow();
-				GM_log("White screen error. Refreshing.....");
-			}
-			return;
 		}
-		checkiFrame();
-	},10000);
+		if (!iFrame){
+		  var iframes = document.getElementsByTagName('iframe');
+		  for (var i=0; i<iframes.length; i++){
+			if (iframes[i].className=='canvas_iframe_util'){
+			  iFrame = iframes[i];
+			  break; 
+			}
+		  }
+		}
+		if (!iFrame && checknumber<10){
+		  checknumber++;
+		  setTimeout (checkiFrame, 1000);
+		  return;
+		} else if (checknumber>=10){
+			KOCAttack.ReloadWindow();
+			GM_log("White screen error. Refreshing.....");
+		}
+		return;
+	}
+	checkiFrame();
 }
 function checkStrangeMagic (){
 	GM_log("Check strange majic");
@@ -5491,7 +5527,6 @@ function popup (left, top, width, height, content){
 
 /******************* Function calls ******************/
 KOCAttack.Listen();
-checkWhiteScreen();
 DisableMixpanel();
 if(unsafeWindow.cm){
 	unsafeWindow.cm.cheatDetector={
