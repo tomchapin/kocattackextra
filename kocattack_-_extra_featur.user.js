@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.6.0
+// @version          0.9.6.1
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.0';
+var KOCAversion = '0.9.6.1';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -674,8 +674,8 @@ var KOCAttack={
 	ReloadWindow:function() {
 		var m=/^[a-zA-Z]+([0-9]+)\./.exec(document.location.hostname);
 		if (!m){
-			//window.location.reload(true);
-			history.go(0);
+			window.location.reload(true);
+			//history.go(0);
 			return;
 		}
 		var goto = 'http://apps.facebook.com/kingdomsofcamelot/?s='+m[1];
@@ -3017,6 +3017,7 @@ var KOCAttack={
 			var dist=t.CalcXYDist({'x':xy[0],'y':xy[1]},{'x':x,'y':y});
 			if (dist==0) { return; } // Don't attack yourself
 			if(dist>=t.options.attackMaxDistance) { return; }
+			if(t.options.lockAttackFromCity && attack.fromCity!=unsafeWindow.currentcityid) { return; }
 			attacks.push({'dist':dist,'x':xy[0],'y':xy[1],'a':attack});
 		});
 		attacks.sort(function(a,b) {
@@ -4926,10 +4927,6 @@ var KOCAttack={
 		
 		} // End of code strictly for page: koc_game
 		
-		if(t.currentPage == 'app_page'){
-			setTimeout(function(){checkWhiteScreen();},10000);
-		}
-
 		var domTickTimer=null;
 		var domTickUpto=0;
 		var domTick=function(e) {
@@ -5459,6 +5456,7 @@ function DisableMixpanel() {
 
 /******************* Check strange majic error ******************/
 function checkWhiteScreen (){
+  window.setTimeout(function(){
 	GM_log("Check iFrame");
 	var checknumber = 0;
 	function checkiFrame() {
@@ -5492,6 +5490,7 @@ function checkWhiteScreen (){
 		return;
 	}
 	checkiFrame();
+  }, 10000);
 }
 function checkStrangeMagic (){
 	GM_log("Check strange majic");
@@ -5527,6 +5526,7 @@ function popup (left, top, width, height, content){
 
 /******************* Function calls ******************/
 KOCAttack.Listen();
+checkWhiteScreen();
 DisableMixpanel();
 if(unsafeWindow.cm){
 	unsafeWindow.cm.cheatDetector={
