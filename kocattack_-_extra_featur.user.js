@@ -5461,10 +5461,11 @@ function checkWhiteScreen (){
 	var checknumber = 0;
 	function checkiFrame() {
 		var iFrame = null;
+		var e = null;
 		try{
-		var e = document.getElementById('app_content_130402594779').firstChild.firstChild;
-		} catch (e){
-		//don't care
+		  e = document.getElementById('app_content_130402594779').firstChild.firstChild;
+		} catch (error){
+			return;
 		}
 		if(e){
 			for (var c=0; c<e.childNodes.length; c++){
