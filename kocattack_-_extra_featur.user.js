@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.6.2
+// @version          0.9.6.3
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.2';
+var KOCAversion = '0.9.6.3';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -5239,6 +5239,13 @@ function SetupQuickMarchButton(useRetryMarch) {
 		[['v += parseInt','var f = parseInt']],
 		[['"Count"]);','"Count"]); if(f>0) { var uname=unitcost["unt"+r][0]; v+=uname[0]+uname[uname.length-1]+":"+f+", "; } ']],
 	];
+	var attack_generatequeueReplacesW=[
+		[['var w = 0;','var w = "K:"+seed.knights["city" + currentcityid]["knt" + A].combat+", "; ']],
+		[['w += parseInt','var t = parseInt']],
+		[['w += parseInt','var t = parseInt']],
+		[['"Return"])','"Return"]); if(t>0) { var uname=unitcost["unt"+s][0]; w+=uname[0]+uname[uname.length-1]+":"+t+", "; } ']],
+		[['"Count"])','"Count"]); if(t>0) { var uname=unitcost["unt"+s][0]; w+=uname[0]+uname[uname.length-1]+":"+t+", "; } ']],
+	];
 		
 /*****	
 	if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1) {
@@ -5324,18 +5331,21 @@ function SetupQuickMarchButton(useRetryMarch) {
 	var arr=[];
 	AddArray(arr,attack_generatequeueReplaces);
 	var funcStr=window['attack_generatequeue'].toString();
-	if(funcStr.indexOf('; var u = 0;')>=0) {
-		AddArray(arr,attack_generatequeueReplacesU);
+	if(funcStr.indexOf(' var w = 0;')>=0) {
+		// camelotmain-218
+		AddArray(arr,attack_generatequeueReplacesW);
 	} else if(funcStr.indexOf('; var r = 0;')>=0) {
 		AddArray(arr,attack_generatequeueReplacesR);
 	} else if(funcStr.indexOf('; var s = 0;')>=0) {
 		AddArray(arr,attack_generatequeueReplacesS);
-	} else if(funcStr.indexOf(' var t = 0;')>=0) {
+	} else if(funcStr.indexOf('; var t = 0;')>=0) {
 		// camelotmain-150
 		AddArray(arr,attack_generatequeueReplacesT);
-	} else if(funcStr.indexOf(' var v = 0;')>=0) {
+	} else if(funcStr.indexOf('; var v = 0;')>=0) {
 		// camelotmain-165
 		AddArray(arr,attack_generatequeueReplacesV);
+	} else if(funcStr.indexOf('; var u = 0;')>=0) {
+		AddArray(arr,attack_generatequeueReplacesU);
 	} else {
 		var err="Unknown attack queue func: "+location.href+"\n"+funcStr;
 		GM_log(err);
