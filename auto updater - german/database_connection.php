@@ -11,9 +11,9 @@
 
 	// Database parameters
 	$db_host = "localhost";
-	$db_login = "web123451";
-	$db_password = "hJ4ydvJp";
-	$db_database = "usr_web123451_2";
+	$db_login = "databaseusername";
+	$db_password = "YourDataBasePassword";
+	$db_database = "databasename";
 	
 	$db = new Quickbase($db_host, $db_login, $db_password, $db_database);
 
