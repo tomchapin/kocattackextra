@@ -14,7 +14,7 @@
 <h1>TomChapin.Me</h1>
 
 This is the official auto-update server for Thomas Chapin's various userscripts.<br />
-The auto-updater found <a href="http://www.tomchapin.me/auto-updater.php?id=89473">here</a> is based off of the official <a href="http://userscripts.org/guides/45">auto-updater script by sizzlemctwizzle</a>,<br />
+The auto-updater found <a href="http://www.tomchapin.me/auto-updater.php?id=89473">here</a> (English) and <a href="http://www.tomchapin.me/auto-updater-german.php?id=89473">here</a> (German translation by PDX) is based off of the official <a href="http://userscripts.org/guides/45">auto-updater script by sizzlemctwizzle</a>,<br />
 but with some modifications so that it no longer uses the obtrusive javascript confirmation dialog (which would normally halt all action on the page).<br />
 <br />
 
