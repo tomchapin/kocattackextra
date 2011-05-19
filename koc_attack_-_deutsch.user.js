@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name             KOCAttack - Extra Features!
-// @version          0.9.6.3
-// @namespace        KOCAttack-Extra
-// @homepage         http://userscripts.org/scripts/show/89473
-// @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
+// @name             KoC Attack - Deutsch
+// @version          0.9.6.3.24
+// @namespace        PDX
+// @homepage	     http://koc.god-like.org
+// @description      KoC Attack - Extra Feature! German Version by PDX
 
 // @include          *apps.facebook.com/kingdomsofcamelot*
 // @include          *kingdomsofcamelot.com/*main_src.php*
@@ -11,18 +11,19 @@
 // @include          *facebook.com/connect/uiserver.php*
 // @include          *kingdomsofcamelot.com/*standAlone.php*
 
-// @require          http://tomchapin.me/auto-updater.php?id=89473
+// @icon		     http://koc.god-like.info/pdx.jpg
+// @require			http://koc.god-like.info/update/auto-updater.php?id=98234
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.3';
+var KOCAversion = '0.9.6.3.24';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
 unsafeWindow.alert = function(message) {
-	console.info("Javascript Alert: "+message);
+	console.info("Javascript Alarm: "+message);
 	if(typeof(GM_log)=="function"){
-		GM_log("Javascript Alert: "+message);
+		GM_log("Javascript Alarm: "+message);
 	}
 }
 alert = unsafeWindow.alert;
@@ -115,11 +116,11 @@ function inspect(obj, maxLevels, level){
     // At least you want to show the first level
     if(maxLevels == null) maxLevels = 1;
     if(maxLevels < 1)     
-        return '<font color="red">Error: Levels number must be > 0</font>';
+        return '<font color="red">Fehler: Level müssen > 0 sein</font>';
 
     // We start with a non null object
     if(obj == null)
-    return '<font color="red">Error: Object <b>NULL</b></font>';
+    return '<font color="red">Fehler: Objekt <b>NULL</b></font>';
     // End Input Validations
 
     // Each Iteration must be indented
@@ -146,7 +147,7 @@ function inspect(obj, maxLevels, level){
         if(typeof(err) == 'string') msg = err;
         else if(err.message)        msg = err.message;
         else if(err.description)    msg = err.description;
-        else                        msg = 'Unknown';
+        else                        msg = 'Unbekannt';
 
         str += '<li><font color="red">(Error) ' + property + ': ' + msg +'</font></li>';
       }
@@ -272,7 +273,7 @@ var KOCAttack={
 			try {  
 				eval("unsafeWindow."+func);
 			} catch (error) {
-				this.Log("A javascript error has occurred when executing a function via DoUnsafeWindow. Error description: "+error.description);
+				this.Log("Ein Javascript hat fehler verursacht beim aufruf einer Funktion via DoUnsafeWindow. Fehler Meldung: "+error.description);
 			}
 		}
 	},
@@ -298,18 +299,18 @@ var KOCAttack={
 		
 		div.innerHTML = '';
 		
-		var m = '<a id="ImportBoxCancel" class="button20"><span>Close</span></a>';
+		var m = '<a id="ImportBoxCancel" class="button20"><span>Schließen</span></a>';
 		m += '<a id="ImportData" class="button20"><span>Import</span></a>';
 		m += '<a id="ExportData" class="button20"><span>Export</span></a>&nbsp;';
 		
 		var cities=this.GetSeed().cities;
 		//WinLog.write(inspect(cities));
-		var citysel ='<select id=srcCity>';
+		var citysel ='<select id=srcStadt>';
 		//citysel += '<option value=All>All Cities</option>';
 		for(var c=0; c<cities.length; c++) {
 			citysel += '<option value="'+cities[c][0]+'">'+cities[c][1]+'</option>';
 		}
-		citysel += '<option value=options>Options</option>';		
+		citysel += '<option value=options>Einstellung</option>';		
 		citysel += '</select>';
 		
 		m += citysel;
@@ -340,12 +341,12 @@ var KOCAttack={
 		      var v=KOCAttack.browser_getValue(name,null);
 			  if(v!=null && v!=undefined && v!=""){			  
 			    x = JSON2.parse(v);
-			    if (x.fromCity == ById('srcCity').value) {
+			    if (x.fromStadt == ById('srcStadt').value) {
 			      obj[name]=v;
 			    }
 		      }
 			}
-			else if (ById('srcCity').value == 'options') {
+			else if (ById('srcStadt').value == 'options') {
   		      var sid=KOCAttack.GetServerIdFromName(name);
 		      if(sid!=serverId) continue;
 		      var v=KOCAttack.browser_getValue(name,null);
@@ -377,56 +378,56 @@ var KOCAttack={
 		}
 		var cities=this.GetSeed().cities;
 		//WinLog.write(inspect(cities));
-		var citysel ='<select id=srcCity>';
-		citysel += '<option value=All>All Cities</option>';
+		var citysel ='<select id=srcStadt>';
+		citysel += '<option value=All>Alle</option>';
 		for(var c=0; c<cities.length; c++) {
 			citysel += '<option value="'+cities[c][1]+'">'+cities[c][1]+'</option>';
 		}		
 		citysel += '</select>';
 		
 		var levelsel ='<select id=srcLevel>';
-		levelsel += '<option value="All">All Levels</option>';
+		levelsel += '<option value="All">Alle</option>';
 		for(var c=1; c<=11; c++) {
 			levelsel += '<option value="'+c+'">Level '+c+'</option>';
 		}
 		levelsel += '</select>';
 		
 		var typesel ='<select id=srcAttackType>';
-		typesel += '<option value="All">All</option>';
-		typesel += '<option value="normal">Attacks</option>';
-		typesel += '<option value="transport">Transports</option>';
-		typesel += '<option value="bulkadded">Bulk Adds</option>';
+		typesel += '<option value="All">Alle</option>';
+		typesel += '<option value="normal">Angriffe</option>';
+		typesel += '<option value="transport">Transporte</option>';
+		typesel += '<option value="koord">Hinzugefüge Koordinaten</option>';
 		typesel += '</select>';
 		
 		div.style.display='block';
 		div.innerHTML='';
 		var m = '<DIV id="srcAttackOpts" style="height:30px">\
-		<TABLE><TR valign=bottom><TD class=xtab width=100 align=center>Search for: </td><TD align=left>\
+		<TABLE><TR valign=bottom><TD class=xtab width=100 align=center>Suchen: </td><TD align=left>\
 		<SELECT id=srcAttack>\
-		<OPTION value=All>All</option>\
-		<OPTION value=Camp>Barb Camp</option>\
-		<OPTION value=Wilderness>Wilderness</option>\
+		<OPTION value=All>Alle</option>\
+		<OPTION value=Barbaren>Barbaren Lager</option>\
+		<OPTION value=Wildniss>Wildnisse</option>\
 		<OPTION value=Grassland>Grassland</option>\
-		<OPTION value=Lake>Lake</option>\
-		<OPTION value=Mountains>Mountains</option>\
-		<OPTION value=Forest>Woods</option>\
-		<OPTION value=Hills>Hills</option>\
-		<OPTION value=Plain>Plains</option>\
-		<OPTION value=City>City</option>\
-		<OPTION value=Transport>Transport</option>\
-		<OPTION value=Unknown>Unknown</option>\
+		<OPTION value=See>See</option>\
+		<OPTION value=Berg>Berg</option>\
+		<OPTION value=Wälder>Wald</option>\
+		<OPTION value=Hügel>Hügel</option>\
+		<OPTION value=Ebene>Ebene</option>\
+		<OPTION value=Stadt>Städte</option>\
+		<OPTION value=Transport>Transporte</option>\
+		<OPTION value=Unknown>Unbekannt</option>\
 		</select></td>\
-		<td class=xtab width=100 align=center>Select City: &nbsp; </td>\
+		<td class=xtab width=100 align=center>Heiligtum: &nbsp; </td>\
 		 <td align=left><span id=ptattackcity></span></td>\
-		 <td class=xtab width=100 align=center>Select Level: &nbsp; </td>\
+		 <td class=xtab width=100 align=center>Level: &nbsp; </td>\
 		 <td align=left><span id=ptattacklevel></span></td>\
-		 <td class=xtab width=100 align=center>Select Type: &nbsp; </td>\
+		 <td class=xtab width=100 align=center>Typ: &nbsp; </td>\
 		 <td align=left><span id=ptattacktype></span></td></tr>\
 		</table></div>\
-		<a id="KOCAttackViewAttacksCancel" class="button20"><span>Close</span></a>\
-		<a id="KOCAttackViewAttacksList" class="button20"><span>List Attacks</span></a>\
-		<a id="KOCAttackViewAttacksClearList" class="button20"><span>Clear List</span></a>\
-		<a id="KOCAttackViewAttacksDelete" class="button20"><span>Delete Selected</span></a>\
+		<a id="KOCAttackViewAttacksCancel" class="button20"><span>Schließen</span></a>\
+		<a id="KOCAttackViewAttacksList" class="button20"><span>Aktuallisieren</span></a>\
+		<a id="KOCAttackViewAttacksClearList" class="button20"><span>Leeren</span></a>\
+		<a id="KOCAttackViewAttacksDelete" class="button20"><span>Löschen</span></a>\
 		<br><br><DIV id="srcAttackResults" style="height:470px; max-height:470px; overflow-y:auto;"></div>\
 		';
 		
@@ -459,13 +460,13 @@ var KOCAttack={
 		  //WinLog.write(inspect(t.attacks,10));
 		  
 		  var typeQuery = ById('srcAttackType').value;
-		  var cityQuery = ById('srcCity').value;
+		  var cityQuery = ById('srcStadt').value;
 		  var levelQuery = ById('srcLevel').value;
 		  var attackQuery = ById('srcAttack').value;
 		  
 		  var h = '<table>';
-		  h += '<tr><td><input type=checkbox id=selAllAttacks></td><td>&nbsp;</td><td>City</td><td>Coords</td><td nowrap>What</td>';
-		  h += '<td>Type</td><td>Attack Troops</td><td>Suicide Troops/Resources</td><td>Dist</td><td>Time</td><td>Ignore</td></tr>';
+		  h += '<tr><td><input type=checkbox id=selAllAttacks></td><td>&nbsp;</td><td>Stadt</td><td>Koordinate</td><td nowrap>Was ?</td>';
+		  h += '<td>Type</td><td>Truppenstärke</td><td>Kamikaze Wellen/Resourcen</td><td>Entf.</td><td>Zeit</td><td>Ignorieren</td></tr>';
 		  var tableRows= '';
 		  var count = 1
 		  for(var a=0; a<t.attacks.length; a++) {
@@ -475,12 +476,12 @@ var KOCAttack={
 			if (levelInfo.type){
 			  type = levelInfo.type;
 			} else {
-			  type = 'Unknown';
+			  type = 'Unbekannt';
 			}
 
 			var displayRow = '';
 			if (cityQuery != 'All'){
-			  if (t.GetCityName(t.attacks[a]['fromCity']) != cityQuery){
+			  if (t.GetStadtName(t.attacks[a]['fromStadt']) != cityQuery){
 			    continue;
 			  }
 			}
@@ -502,7 +503,7 @@ var KOCAttack={
 			}					
 			tableRows += '<tr id=row'+count+' style="display: '+displayRow+';">';
 			tableRows += '<td><input type=checkbox id=aasel'+count+'>';
-			tableRows += '<td>'+count+'</td><td>'+t.GetCityName(t.attacks[a]['fromCity'])+'</td>';
+			tableRows += '<td>'+count+'</td><td>'+t.GetStadtName(t.attacks[a]['fromStadt'])+'</td>';
 			tableRows += '<td id=aacoords'+count+' onclick="aaGotoMapHide('+t.attacks[a].xy[0]+','+t.attacks[a].xy[1]+')">'+t.attacks[a].xy[0]+','+t.attacks[a].xy[1]+'</td>';
 
 			tableRows += '<td nowrap>'+type+' Level '+levelInfo.level+'</td>';
@@ -546,7 +547,7 @@ var KOCAttack={
 			}
       tableRows += '</td>';
       
- 	  var distance=t.CalcXYDist({'x':t.attacks[a].xy[0],'y':t.attacks[a].xy[0]},{'x':t.GetCityCoordsX(t.attacks[a]['fromCity']),'y':t.GetCityCoordsX(t.attacks[a]['fromCity'])});
+ 	  var distance=t.CalcXYDist({'x':t.attacks[a].xy[0],'y':t.attacks[a].xy[0]},{'x':t.GetStadtCoordsX(t.attacks[a]['fromStadt']),'y':t.GetStadtCoordsX(t.attacks[a]['fromStadt'])});
 	  tableRows += '<td>'+parseInt(distance)+'</td>';
 	  
 			var nowSecs=new Date().getTime()/1000;
@@ -577,12 +578,12 @@ var KOCAttack={
 			    //ById(row).checked == false;
 			    var c = ById('aacoords'+i).innerHTML;
 			    var xy = c.split(",");
-			    GM_log('Coords '+xy[0]+' '+xy[1]);
+			    GM_log('Koordinate '+xy[0]+' '+xy[1]);
 			    t.DeleteAttack(xy[0],xy[1]);
 				deletes++;
 			  }
 			}
-			window.alert(deletes+' of coords deleted');
+			window.alert(deletes+' Erfolgreich gelöscht!');
 			var listBtn=ById('KOCAttackViewAttacksList');
 			nHtml.Click(listBtn);
 		  },false);
@@ -641,7 +642,7 @@ var KOCAttack={
 		return JSON2.parse(str);
 	},
 	
-	GetCityName:function(cityid) {  
+	GetStadtName:function(cityid) {  
 	  var cityName;
 	  for(var a=0; a<unsafeWindow.seed.cities.length; a++) {
 	    if(unsafeWindow.seed.cities[a][0] == cityid){
@@ -651,7 +652,7 @@ var KOCAttack={
 	  return cityName;
 	},	
 
-	GetCityCoordsX:function(cityid) {  
+	GetStadtCoordsX:function(cityid) {  
 	  var cityName;
 	  for(var a=0; a<unsafeWindow.seed.cities.length; a++) {
 	    if(unsafeWindow.seed.cities[a][0] == cityid){
@@ -661,7 +662,7 @@ var KOCAttack={
 	  return x;
 	},	
 
-	GetCityCoordsY:function(cityid) {  
+	GetStadtCoordsY:function(cityid) {  
 	  var cityName;
 	  for(var a=0; a<unsafeWindow.seed.cities.length; a++) {
 	    if(unsafeWindow.seed.cities[a][0] == cityid){
@@ -679,7 +680,7 @@ var KOCAttack={
 			return;
 		}
 		var goto = 'http://apps.facebook.com/kingdomsofcamelot/?s='+m[1];
-		var t = '<FORM target="_top" action="'+ goto +'" method=post><INPUT id=xxButReload type=submit value=RELOAD><input type=hidden name=s value="'+ m[1] +'"</form>';
+		var t = '<FORM target="_top" action="'+ goto +'" method=post><INPUT id=xxButReload type=submit value=REFRESH><input type=hidden name=s value="'+ m[1] +'"</form>';
 		var e = document.createElement ('div');
 		e.innerHTML = t;
 		document.body.appendChild (e);
@@ -710,7 +711,7 @@ var KOCAttack={
 		okCitiesHtml+='</span>';
 		
 		var attackfirst = '';
-		var arrData = [["Camp", "Camps"],["City", "City"],["Transport", "Transport"],["Wilderness", "Wildernesses"],["None", "None"]];
+		var arrData = [["Barbaren", "Barbaren Lager"],["Stadt", "Städte"],["Transport", "Transporte"],["Wildniss", "Wildnisse"],["Keine", "Keine"]];
 		for (var i=0; i < arrData.length; i++){
 			attackfirst += "<input type=radio name=KOCAttackPriority id='KOCAttackPriority_"+arrData[i][0]+"' value="+arrData[i][0]+" "+(arrData[i][0]==this.options.attackpriority?'checked':'')+"/>";
 			attackfirst += "<label for='KOCAttackPriority_"+arrData[i][0]+"'>"+arrData[i][1]+"</label>";
@@ -721,77 +722,85 @@ var KOCAttack={
 		this.options=this.GetOptions();
 		div.innerHTML="<form><table>"+
 			"<tr><td valign='top' align='center'><img src='img/units/unit_6_50.jpg' /></td><td valign='top'>"+
-			"Attack Order: <select id='KOCAttackOrder'><option value='mostTroops'>Use most troops first</option><option value='closest'>Closest targets first</option></select><br />"+
-			"Attack Type: <input type='checkbox' "+(this.options.attackTypeCamp?'checked':'')+" id='KOCAttackTypeCamp'>Camp "+
-			"<input type='checkbox' "+(this.options.attackTypeWild?'checked':'')+" id='KOCAttackTypeWild'>Wilderness "+
-			"<input type='checkbox' "+(this.options.attackTypeCity?'checked':'')+" id='KOCAttackTypeCity'>City "+
-			"<input type='checkbox' "+(this.options.attackTypeTransport?'checked':'')+" id='KOCAttackTypeTransport'>Transport<br> "+
-			"Prioritise attacks for : "+attackfirst+
+			"Angriffs Befehl: <select id='KOCAttackOrder'><option value='mostTroops'>Truppenstärke</option><option value='closest'>Entfernung</option></select><br />"+
+			"Marsch Typ: <input type='checkbox' "+(this.options.attackTypeBarbaren?'checked':'')+" id='KOCAttackTypeBarbaren'>Barbaren Lager "+
+			"<input type='checkbox' "+(this.options.attackTypeWild?'checked':'')+" id='KOCAttackTypeWild'>Wildnisse "+
+			"<input type='checkbox' "+(this.options.attackTypeStadt?'checked':'')+" id='KOCAttackTypeStadt'>Städte "+
+			"<input type='checkbox' "+(this.options.attackTypeTransport?'checked':'')+" id='KOCAttackTypeTransport'>Transporte<br> "+
+			"Priorität für Angriffe auf: "+attackfirst+ 
 			"<br><br />"+
-			"<input id='KOCAttackDelay' value='"+this.options.attackDelay+"' size='3' /> seconds inbetween sending each attack<br />"+
-			"Time inbetween sending to the <u>same target</u>...<br />"+
+			"<input id='KOCAttackDelay' value='"+this.options.attackDelay+"' size='3' /> Sekunden Abstand zwischen den Angriffen!<br />"+
+			"Die Zeit in der die <u>gleichen</u> Ziele angegriffen werden.<br />"+
 			"<div style='margin-left: 40px'>"+
-			"Attacking camp:<input id='KOCAttackHoursSinceLastCamp' value='"+(this.options.attackSecsSinceLastCamp/(60*60))+"' size='3' />hrs<br />"+
-			"Attacking wilderness:<input id='KOCAttackHoursSinceLastWild' value='"+(this.options.attackSecsSinceLastWild/(60*60))+"' size='3' />hrs<br />"+
-			" Attacking city:<input id='KOCAttackHoursSinceLastCity' value='"+(this.options.attackSecsSinceLastCity/(60*60))+"' size='3' />hrs<br />"+
-			" Transporting:<input id='KOCAttackMinsSinceLastTransport' value='"+(this.options.attackSecsSinceLastTransport/(60))+"' size='3' />mins<br />"+
-			" If transporting, try to keep at least <input id='KOCAttackTransportReserveAmount' value='"+this.options.transportResourcesReserveAmount+"' size='10' /> of each resource in each city <font color=#FF0000>(NEW)</font>"+
+			"Barbaren Lager: <input id='KOCAttackHoursSinceLastBarbaren' value='"+(this.options.attackSecsSinceLastBarbaren/(60*60))+"' size='3' />Stunden<br />"+
+			"Wildnisse: <input id='KOCAttackHoursSinceLastWild' value='"+(this.options.attackSecsSinceLastWild/(60*60))+"' size='3' />Stunden<br />"+
+			" Angriff auf Städte: <input id='KOCAttackHoursSinceLastStadt' value='"+(this.options.attackSecsSinceLastStadt/(60*60))+"' size='3' />Stunden<br />"+
+			" Transporte: <input id='KOCAttackMinsSinceLastTransport' value='"+(this.options.attackSecsSinceLastTransport/(60))+"' size='3' />Minuten<br />"+
+			" <input id='KOCAttackTransportReserveAmount' value='"+this.options.transportResourcesReserveAmount+"' size='10' /> je Ressource in der Stadt als mind. Bestand stehen lassen! <font color=#600000>(Überproduktion)</font>"+
 			"</div>"+
-			"<input id='KOCAttackRandom' value='"+this.options.randomPercent+"' size='3' />% random adjustment for all delays (to look more human).<br />"+
+			"<input id='KOCAttackRandom' value='"+this.options.randomPercent+"' size='3' />% zufällige Verzögerung <font color=#600000>(um Menschlich zu wirken!)</font><br />"+
 			"<br />"+
-			"<input id='KOCAttackMaxDistance' value='"+(this.options.attackMaxDistance)+"' size='3' /> max distance away from city to attack/transport.<br />"+
-			"<input id='KOCAttackLockAttackFromCity' type='checkbox' "+(this.options.lockAttackFromCity?'checked':'')+" /> Only launch attacks from city they were first launched from.<br />"+
-			"<input id='KOCAttackUnselectKnight' type='checkbox' "+(this.options.knightreset?'checked':'')+" /> Deselect knight when not in attack mode.<br />"+
-			"<input id='KOCAttackRetryMarch' type='checkbox' "+(this.options.retryMarch?'checked':'')+" /> Retry march if it has unknown/excess traffic error (press reload after changing this option).<br />"+
-			"<input id='KOCAttackImpendingStopAttack' type='checkbox' "+(this.options.impendingStopAttack?'checked':'')+" /> Stop auto attack on impeding alert.<span style='color:red'> (Will not restart auto after the attack. Use at your own risk)</span><br />"+			
-			"Open up this URL (such as a link to a sound/video file) in a tab when we're under attack:<br /><input id='KOCAttackImpendingAttackUrl' size='60' value='"+(this.options.impendingAttackUrl)+"' /><br />"+
+			"<input id='KOCAttackMaxDistance' value='"+(this.options.attackMaxDistance)+"' size='3' /> max. Entfernung für Angriffe/Transporte<br />"+
+			"<input id='KOCAttackLockAttackFromStadt' type='checkbox' "+(this.options.lockAttackFromStadt?'checked':'')+" /> Nur aus der Stadt aus Angreifen aus dem der erste Angriff gestartet wurde!<br />"+
+			"<input id='KOCAttackUnselectKnight' type='checkbox' "+(this.options.knightreset?'checked':'')+" /> Ritter nur im Angriff einsetzen!<br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \"><u><b>Hinweis</b></u>: wird auch bei verstärkung keinen Ritter automatisch einsetzen!</span><br />"+	
+			"<input id='KOCAttackRetryMarch' type='checkbox' "+(this.options.retryMarch?'checked':'')+" /> Marsch Abbrechen wenn: unknown/excess traffic error <font color=#600000>(benötigt Refresh!)</font><br />"+
+			"<input id='KOCAttackImpendingStopAttack' type='checkbox' "+(this.options.impendingStopAttack?'checked':'')+" /> Auto Attack Ausschalten wenn du angegriffen wirst.<br />"+	
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \"><u><b>Hinweis</b></u>: Auto Attack wird nach dem Angriff NICHT automatisch eingeschaltet!</span><br />"+		
+			"URL Aufrufen: <input id='KOCAttackImpendingAttackUrl' size='60' value='"+(this.options.impendingAttackUrl)+"' /><br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \"><u><b>Hinweis</b></u>: Wird beim Angriff auf dich Aufgerufen z.B. Sound Datei eintragen</span><br />"+
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/chrome_message_up.png' /></td><td valign='top'>"+
-			"<input id='KOCAttackRemoveReports' type='checkbox' "+(this.options.autoRemoveReports?'checked':'')+" /> Auto remove barbarian/wilderness attack reports.<br />"+
-			"<input id='KOCAttackRemoveFarmReports' type='checkbox' "+(this.options.autoRemoveFarmReports?'checked':'')+" /> Auto remove farm attack reports.<br />"+
-			"<input id='KOCAttackKeepReports' value='"+this.options.keepReports+"' size='3' /> attack reports to keep maximum in the attack dialog.<br />"+
-			"<input id='KOCAttackNoViewReports' type='checkbox' "+(this.options.noViewReports?'checked':'')+" /> Disable viewing of reports, this will also disable collecting of reports for the attack page.<br />"+
+			"<input id='KOCAttackRemoveReports' type='checkbox' "+(this.options.autoRemoveReports?'checked':'')+" /> Automatisches Löschen der Barbaren/Widlniss Berichten. <font color=#600000>(benötigt Refresh!)</font><br />"+
+			"<input id='KOCAttackRemoveFarmReports' type='checkbox' "+(this.options.autoRemoveFarmReports?'checked':'')+" /> Farm Berichte Automatisch Löschen.<br />"+
+			"<input id='KOCAttackKeepReports' value='"+this.options.keepReports+"' size='3' /> Angriffs Berichte die auf der Angriffs Seite Angezeigt werden. <font color=#600000>(Truppen aussenden Fenster)</font><br />"+
+			"<input id='KOCAttackNoViewReports' type='checkbox' "+(this.options.noViewReports?'checked':'')+" /> Berichte Automatisch aufrufen Ausschalten.<br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \"><u><b>Hinweis</b></u>: Wird auch die Berichte der Angriffs Seite deaktivieren!</span><br />"+	
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/chome_alliance_up.png' /></td><td valign='top'>"+
-			"<input id='KOCAttackPercentOfPopToTrain' value='"+this.options.percentOfPopToTrain+"' size='3' />% of idle population available before we auto train <input id='KOCAttackPercentToTrainOfMax' value='"+this.options.percentToTrainOfMax+"' size='3' />% of max available.<br />"+
-			"<span style=\"font-size:10px; color:#555; line-height:18px; \">To enable auto training, toggle the auto train button under a troop type in the barracks.</span><br />"+
-			"<span style=\"font-size:10px; color:#555; line-height:18px; \">Note: If you auto train 100% of max population, you might sometimes encounter resource errors due to game caching.</span><br />"+
+			"Bei <input id='KOCAttackPercentOfPopToTrain' value='"+this.options.percentOfPopToTrain+"' size='3' />% Müßiges Volk Auto Ausbildung Starten und <input id='KOCAttackPercentToTrainOfMax' value='"+this.options.percentToTrainOfMax+"' size='3' />% von dem max. möglichen Volk Ausbilden!<br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \">Um Auto Ausbildung einzuschalten einfach in den Kasernen beim Truppen Typ 'Auto Ausbildung - EIN' schalten!</span><br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \"><u><b>Hinweis</b></u>: Wenn du 100% vom verfügbaren Volk ausbilden möchtest, kann es manchmal zu Fehlern mit den Ressourcen kommen. Kommt durch die Spiel Cache.</span><br />"+
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/gold_30.png' /></td><td valign='top'>"+
-			"<input id='KOCAttackAutoGoldHappiness' value='"+this.options.autoGoldHappiness+"' size='3' />% happiness before we click auto gold.<br />"+
-			"<span style=\"font-size:10px; color:#555; line-height:18px; \">To enable auto gold, toggle the auto gold button from inside your castle overview window.</span><br />"+
+			"Bei <input id='KOCAttackAutoGoldHappiness' value='"+this.options.autoGoldHappiness+"' size='3' />% Glück Auto Gold Starten <font color=#600000>(Ab wieviel % Glück soll geklickt werden?)</font><br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \">Um Auto Gold zu Aktevieren einfach im Schloss 'Auto Gold - EIN' schalten.</span><br />"+
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/gems.png' /></td><td valign='top'>"+
-			"<input id='KOCAttackDisableInviteFriends' type='checkbox' "+(this.options.disableInviteFriends?'checked':'')+" /> Disable the annoying \"Invite Friends\" popup dialog in-game.<br />"+
-			"<input id='KOCAttackAutoHelpAlliance' type='checkbox' "+(this.options.autoHelpAlliance?'checked':'')+" /> Automatically help alliance members with building/researching.<br />"+
-			"<input id='KOCAttackHideAllianceHelpRequests' type='checkbox' "+(this.options.hideAllianceHelpRequests?'checked':'')+" /> Hide alliance help requests/reports in chat (if above is checked, then after helping).<br />"+
-			"<input id='KOCAttackAutoPublishGamePopups' type='checkbox' "+(this.options.autoPublishGamePopups?'checked':'')+" /> Automatically publish game popups (such as help requests) to facebook wall.<br />"+
-			"If above is checked, what privacy setting should we use? <select id='KOCAttackAutoPublishPrivacy'><option value='80'>Everyone</option><option value='50'>Friends of Friends</option><option value='40'>Friends Only</option><option value='10'>Only Me</option></select><br />"+
-			"<input id='KOCAttackAutoLogBackIn' type='checkbox' "+(this.options.autoLogBackIn?'checked':'')+" /> Automatically log back into domain if disconnected due to maintenance or server down-time.<br />"+
-			"<input id='KOCAttackEnableLogging' type='checkbox' "+(this.options.enableLogging?'checked':'')+" /> Enable diagnostic logging in the Firefox error console messages window (useful if trying to debug a problem or if you are submitting details along with a bug report).<br />"+
+			"<input id='KOCAttackDisableInviteFriends' type='checkbox' "+(this.options.disableInviteFriends?'checked':'')+" /> \"Freunde Einladen\" popups Blocken.<br />"+
+			"<input id='KOCAttackAutoHelpAlliance' type='checkbox' "+(this.options.autoHelpAlliance?'checked':'')+" /> Automatisch bei Bau und Forschungshilfen helfen.<br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \"><u><b>WICHTIG</b></u>: Bei Chat Einstellung den Allianz Chat auswählen!</span><br />"+
+			"<input id='KOCAttackHideAllianceHelpRequests' type='checkbox' "+(this.options.hideAllianceHelpRequests?'checked':'')+" /> Bau und Forschungshilfen im Chat nicht anzeigen!<br />"+
+			"<span style=\"font-size:10px; color:#555; line-height:18px; \"><u><b>Hinweis</b></u>: Wenn die Auto Hilfe <u>NICHT</u> Akteviert ist wird sie erst nach dem klick ausgeblendet!</span><br />"+
+			"<input id='KOCAttackAutoPublishGamePopups' type='checkbox' "+(this.options.autoPublishGamePopups?'checked':'')+" /> Automatisch veröffentlichen. <font color=#600000>(als Spielanfrage auf die Pinwand posten)</font><br />"+
+			"Wer darf die Anfrage sehen ? <select id='KOCAttackAutoPublishPrivacy'><option value='80'>jeder</option><option value='50'>Freunde von Freunde</option><option value='40'>Nur Freunde</option><option value='10'>Nur Ich</option></select><br />"+
+			"<input id='KOCAttackAutoLogBackIn' type='checkbox' "+(this.options.autoLogBackIn?'checked':'')+" /> Automatisch neu Laden wenn Facebook oder KoC spinnt.<br />"+
+			"<input id='KOCAttackEnableLogging' type='checkbox' "+(this.options.enableLogging?'checked':'')+" /> Diagnostic logging in der Firefox fehler console einschalten. <font color=#600000>(nur für Bug Reports!)</font><br />"+
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/buildings/castle_lvl10.png' /></td><td valign='top'>"+
-			"<input id='KOCAttackChangeCitySecs' value='"+(this.options.changeCitySecs)+"' size='3' /> seconds inbetween changing cities.<br />"+
-			"Cycle thru all the cities <input id='KOCAttackCitiesDoneMax' value='"+(this.options.autoAttackCitiesDoneMax)+"' size='3' /> times and then wait "+
-			"<input id='KOCAttackCitiesDelay' value='"+this.options.waitAfterCitiesDone+"' size='3' />secs before refreshing.<br />"+
-			"Cities to attack from: "+okCitiesHtml+'<br />'+
+			"<input id='KOCAttackChangeStadtSecs' value='"+(this.options.changeStadtSecs)+"' size='3' /> Sekunden warten bis zum Wechsel in die nächste Stadt.<br />"+
+			"Durch alle Städte <input id='KOCAttackCitiesDoneMax' value='"+(this.options.autoAttackCitiesDoneMax)+"' size='3' /> <u>mal</u> Switchen, <u>dann</u> "+
+			"<input id='KOCAttackCitiesDelay' value='"+this.options.waitAfterCitiesDone+"' size='3' />Sekunden <u>warten</u>... danach <font color=#600000>Auto Refresh</font>!<br />"+
+			"Städte von den angegriffen werden soll: "+okCitiesHtml+' <font color=#600000>(Makiert = Eingeschaltet)</font><br />'+
 
 			"<tr><td valign='top' align='center'></td><td valign='top'>"+
-			"Import/Export: Paste or copy the settings here...<br /><textarea id='KOCAttackImport'></textarea>"+
+			"Import/Export: <u>Einstellungen</u> hier reinkopieren...<br /><textarea id='KOCAttackImport'></textarea>"+
 			"<a class='button20' id='KOCAttackImportButton'><span>Import</span></a> <a class='button20' id='KOCAttackExportButton'><span>Export</span></a><br />"+
 			"</td></tr>"+
 
 			"</table>"+
 			
 			"<TABLE width=100%><TR><TD>"+
-			"<a id='KOCAttackOptionsSave' class='button20'><span>Save</span></a> <a id='KOCAttackOptionsCancel' class='button20'><span>Cancel</span></a> <a id='KOCAttackOptionsReset' class='button20'><span>Reset options</span></a> <a id='KOCAttackOptionsResetAll' class='button20'><span>Reset all!</span></a>"+
-			"<a id='KOCAttackDeleteAllStoredAttacks' class='button20'><span>Delete all stored attacks</span></a>"+
-			"<a id='KOCAttackDeleteTransports' class='button20'><span>Delete transports</span></a>"+
+			"<a id='KOCAttackOptionsReset' class='button20'><span>Zurücksetzen (Einstellung)</span></a> <a id='KOCAttackOptionsResetAll' class='button20'><span>Zurücksetzten (alles)</span></a><BR>"+
+			"<a id='KOCAttackDeleteAllStoredAttacks' class='button20'><span>Koordinaten Löschen</span></a>"+
+			"<a id='KOCAttackDeleteTransports' class='button20'><span>Transporte Löschen</span></a><BR>"+
+			"<BR><HR><a id='KOCAttackOptionsSave' class='button20'><span>Speichern</span></a> <a id='KOCAttackOptionsCancel' class='button20'><span>Abbrechen</span></a>"+
+			"</td><TD align=right><a href='http://userscripts.org/scripts/show/98234' target='_blank'>KoC Attack - Deutsch</a><BR>German Version by <a href='http://userscripts.org/users/297645/scripts' target='_blank'>PDX</a><BR>Version:<span style='color:red'> "+ KOCAversion +" </span></td></tr></form>";
 			//"<a id='KOCAttackListAttacks' class='button20'><span>List attacks</span></a><a id='KOCAttackListTransports' class='button20'><span>List transports</span></a>"+
 			"</td><TD align=right>"+ KOCAversion +"</td></tr></form>";
 		var t=this;
@@ -846,19 +855,19 @@ var KOCAttack={
 
 		for(var c=1; c<=8; c++) {
 			var sp=ById('KOCAttackOkCities_'+c);
-			var SetCity=function(target,set) {
+			var SetStadt=function(target,set) {
 				target.style.border=set?'2px solid #080':'';
 				target.style.margin=set?'2px':'4px';
 			};
-			sp.addEventListener('click',function(evt) { SetCity(evt.target,evt.target.style.border==''?true:false); },false);
+			sp.addEventListener('click',function(evt) { SetStadt(evt.target,evt.target.style.border==''?true:false); },false);
 			//sp.onmousedown=function() { return false; }
-			SetCity(sp,t.options.okCities[c]);
+			SetStadt(sp,t.options.okCities[c]);
 		}
 		
 
 		ById('KOCAttackOptionsSave').addEventListener('click',function() {
-			t.options.attackTypeCamp=ById('KOCAttackTypeCamp').checked;
-			t.options.attackTypeCity=ById('KOCAttackTypeCity').checked;
+			t.options.attackTypeBarbaren=ById('KOCAttackTypeBarbaren').checked;
+			t.options.attackTypeStadt=ById('KOCAttackTypeStadt').checked;
 			t.options.attackTypeWild=ById('KOCAttackTypeWild').checked;
 			t.options.attackTypeTransport=ById('KOCAttackTypeTransport').checked;
 			
@@ -875,7 +884,7 @@ var KOCAttack={
 			t.options.attackDelay=parseInt(ById('KOCAttackDelay').value);
 			t.options.waitAfterCitiesDone=parseInt(ById('KOCAttackCitiesDelay').value);
 			t.options.keepReports=parseInt(ById('KOCAttackKeepReports').value);
-			t.options.changeCitySecs=parseInt(ById('KOCAttackChangeCitySecs').value);
+			t.options.changeStadtSecs=parseInt(ById('KOCAttackChangeStadtSecs').value);
 			t.options.autoGoldHappiness=parseInt(ById('KOCAttackAutoGoldHappiness').value);
 			t.options.percentOfPopToTrain=parseFloat(ById('KOCAttackPercentOfPopToTrain').value);
 			t.options.percentToTrainOfMax=parseFloat(ById('KOCAttackPercentToTrainOfMax').value);
@@ -883,7 +892,7 @@ var KOCAttack={
 			var prev_disableInviteFriends = t.options.disableInviteFriends;
 			t.options.disableInviteFriends=ById('KOCAttackDisableInviteFriends').checked;
 			if(prev_disableInviteFriends != t.options.disableInviteFriends){
-				alert("You changed the option for disabling/enabling the \"Invite Friends\" feature.\nPlease note: You will need to refresh the entire game window for the new setting to take effect!");
+				alert("Du hast die Einstellung für \"Freunde Einladen\" popups Blocken geändert!\nHinweis: die nächste Einstellung die du änderst benötigt ein Refresh!");
 			}
 			
 			t.options.autoHelpAlliance=ById('KOCAttackAutoHelpAlliance').checked;
@@ -894,9 +903,9 @@ var KOCAttack={
 			t.options.autoLogBackIn=ById('KOCAttackAutoLogBackIn').checked;
 			t.options.enableLogging=ById('KOCAttackEnableLogging').checked;
 
-			t.options.attackSecsSinceLastCamp=parseFloat(ById('KOCAttackHoursSinceLastCamp').value)*60*60;
+			t.options.attackSecsSinceLastBarbaren=parseFloat(ById('KOCAttackHoursSinceLastBarbaren').value)*60*60;
 			t.options.attackSecsSinceLastWild=parseFloat(ById('KOCAttackHoursSinceLastWild').value)*60*60;
-			t.options.attackSecsSinceLastCity=parseFloat(ById('KOCAttackHoursSinceLastCity').value)*60*60;
+			t.options.attackSecsSinceLastStadt=parseFloat(ById('KOCAttackHoursSinceLastStadt').value)*60*60;
 			t.options.attackSecsSinceLastTransport=parseFloat(ById('KOCAttackMinsSinceLastTransport').value)*60;
 			
 			t.options.transportResourcesReserveAmount=parseInt(ById('KOCAttackTransportReserveAmount').value);
@@ -907,7 +916,7 @@ var KOCAttack={
 
 			t.options.attackOrder=ById('KOCAttackOrder').value;
 			
-			t.options.lockAttackFromCity=ById('KOCAttackLockAttackFromCity').checked;
+			t.options.lockAttackFromStadt=ById('KOCAttackLockAttackFromStadt').checked;
 			t.options.knightreset=ById('KOCAttackUnselectKnight').checked;
 			t.options.autoRemoveReports=ById('KOCAttackRemoveReports').checked;
 			t.options.autoRemoveFarmReports=ById('KOCAttackRemoveFarmReports').checked;
@@ -932,7 +941,7 @@ var KOCAttack={
 		var a=ById('KOCAttackOptionsLink');
 		if(a) return;
 
-		a=this.AddTabLink('Options');
+		a=this.AddTabLink('Einstellung');
 		if(!a) {
 			window.setTimeout(function() {
 				t.AddOptionsLink();
@@ -950,7 +959,7 @@ var KOCAttack={
 		var a=ById('KOCAttackViewAttacksLink');
 		if(a) return;
 
-		a=this.AddTabLink('View Attacks');
+		a=this.AddTabLink('Angriffe');
 		if(!a) {
 			window.setTimeout(function() {
 				t.AddViewAttacksLink();
@@ -1021,14 +1030,14 @@ var KOCAttack={
 		var t=this;
 		var a=t.GetAutoAttack();
 		if(!a) {
-			t.Log("Enabling Auto Attack");
+			t.Log("Auto Attack wird eingeschaltet!");
 			t.SetAutoAttack({'barbarian':true,'cities':{}});
 			window.setTimeout(function() {
 				t.SetAttackStatusMessage();
 			},t.GetRandTime(250));
 			t.RestartAutoAttack();
 		} else {
-			t.Log("Disabling Auto Attack");
+			t.Log("Auto Attack wird ausgeschaltet!");
 			t.ClearAutoAttackTimeout();
 			t.SetAutoAttack(null);
 			window.setTimeout(function() {
@@ -1058,7 +1067,7 @@ var KOCAttack={
 		var toggle=ById('KOCAttackToggle');
 		if(!toggle) {
 		    var t=this;
-			toggle=this.AddTabLink('Auto Attack');
+			toggle=this.AddTabLink('Angriff');
 			if(!toggle) {
 				window.setTimeout(function() {
 					t.SetAttackStatusMessage();
@@ -1073,9 +1082,9 @@ var KOCAttack={
 		var autoAttack=this.GetAutoAttack();
 		//if(autoAttack && autoAttack.cities && autoAttack.cities[t.GetCurrentCityId()]) {
 		if(autoAttack) {
-			toggle.innerHTML='<span>Auto Attack - On</span>';
+			toggle.innerHTML='<span>Angriff = AN</span>';
 		} else {
-			toggle.innerHTML='<span>Auto Attack - Off</span>';
+			toggle.innerHTML='<span>Angriff = AUS</span>';
 		}
 	},
 
@@ -1152,7 +1161,7 @@ var KOCAttack={
 	*/	
 		var idx=0;
 		
-		var cookie='kocattack';
+		var cookie='kocattackdeutsch';
 		var doccookie=document.cookie;
 		while(true) {
 			var i=doccookie.indexOf(cookie+'=',idx);
@@ -1171,7 +1180,7 @@ var KOCAttack={
 	},
 	SetValuesCache:function() {
 		if(!this.isChrome) return;
-		document.cookie='kocattack='+escape(JSON2.stringify(this.valuesCache))+'; expires='+
+		document.cookie='kocattackdeutsch='+escape(JSON2.stringify(this.valuesCache))+'; expires='+
 			(new Date(new Date().getTime()+(60*60*24*365*5)).toGMTString() );
 	},
 
@@ -1220,39 +1229,39 @@ var KOCAttack={
 	},
 
 	ClearOptions:function() {
-		this.SetValue('Options',JSON.stringify({}));
+		this.SetValue('Einstellung',JSON.stringify({}));
 	},
 	GetOptions:function() {
-		var json=this.GetValue('Options','{}');
+		var json=this.GetValue('Einstellung','{}');
 		if(json=='') json='{}';
 		var options=JSON2.parse(json);
-		var defOptions={"attackDelay":15,
-			"attackTypeCamp":true,
+		var defOptions={"attackDelay":8,
+			"attackTypeBarbaren":true,
 			"attackOrder":"closest",
-			"attackpriority":"None",
-			"autoRemoveReports":true,
-			"attackSecsSinceLastCity":60*60*12,
-			"attackSecsSinceLastCamp":3600,
+			"attackpriority":"Keine",
+			"autoRemoveReports":false,
+			"attackSecsSinceLastStadt":60*60*12,
+			"attackSecsSinceLastBarbaren":1800,
 			"attackSecsSinceLastWild":3600,
 			"attackSecsSinceLastTransport":60,
 			"transportResourcesReserveAmount":1000000,
 			"randomPercent":10,
 			"keepReports":10,
-			"attackMaxDistance":60,
-			"lockAttackFromCity":true,
+			"attackMaxDistance":75,
+			"lockAttackFromStadt":true,
 			"knightreset":true,
 			"waitAfterCitiesDone":20,
 			"autoAttackCitiesDoneMax":2,
-			"changeCitySecs":20,
+			"changeStadtSecs":20,
 			"retryMarch":true,
 			"noViewReports":false,
 			"chromeKeepReports":2,
 			"percentOfPopToTrain":75,
 			"percentToTrainOfMax":95,
-			"autoGoldHappiness":99,
+			"autoGoldHappiness":75,
 			"disableInviteFriends":true,
 			"autoHelpAlliance":true,
-			"hideAllianceHelpRequests":false,
+			"hideAllianceHelpRequests":true,
 			"autoPublishGamePopups":false,
 			"autoPublishPrivacySetting":"80",
 			"autoLogBackIn":true,
@@ -1266,7 +1275,7 @@ var KOCAttack={
 		return options;
 	},
 	SetOptions:function(v) {
-		this.SetValue('Options',JSON2.stringify(v));
+		this.SetValue('Einstellung',JSON2.stringify(v));
 	},
 	
 	ClearCrossIframeCommands:function() {
@@ -1321,15 +1330,15 @@ var KOCAttack={
 	IsFirstAttackAtLocation:function(x,y) {
 		var attack=this.GetAttack(x,y);
 		if(!attack){
-			this.Log("Attack not defined in system. This is first attack!");
+			this.Log("Auto Attack: Anrgiff wurde nicht definiert im System, dies ist der erste Angriff!");
 			return true;
 		}
 		if(attack.a) { attack = attack.a; }
 		// Check the current marches to see if there's an existing attack underway from this city
-		var current_marches=this.GetSeed().queue_atkp["city" + this.GetCurrentCityId()];
+		var current_marches=this.GetSeed().queue_atkp["city" + this.GetCurrentStadtId()];
 		for (var march in current_marches) {
 			if(current_marches[march]['toXCoord'] == x && current_marches[march]['toYCoord'] == y){
-				this.Log("Troops are already marching to ("+x+","+y+") in the troop activity.");
+				this.Log("Auto Attack: Truppen rennen bereits auf ("+x+","+y+") laut Truppen Aktivität!");
 				/*
 				this.Log("Suicide wave time: "+attack.suicidewavetime+". Attack time: "+attack.time+".");
 				if(!attack.suicidewavetime || !attack.time){
@@ -1341,11 +1350,11 @@ var KOCAttack={
 					var nowSecs=new Date().getTime()/1000;
 					var elapsedTime=nowSecs-attack.suicidewavetime;
 					if(elapsedTime > 30 && attack.time < attack.suicidewavetime){
-						this.Log("Suicide wave attack was sent more than 30 seconds ago and normal wave has not been sent yet. Suicide wave should be re-sent! This is the first attack sent to ("+x+","+y+")!");
+						this.Log("Auto Attack: Kamikaze Welle ist bereits länger als 30 Sekunden unterwegs und es wurde keine Angriffs welle geschickt, dies wird der erste Angriff auf ("+x+","+y+")!");
 						return true;
 					}
 				}
-				this.Log("This is not the first attack sent to ("+x+","+y+").");
+				this.Log("Auto Attack: Dies ist nicht der erste Angriff auf ("+x+","+y+").");
 				return false;
 				break;
 			}
@@ -1360,7 +1369,7 @@ var KOCAttack={
 		}
 		*/
 
-		this.Log("Troops are not currently marching to ("+x+","+y+") in the troop activity. This is the first attack.");
+		this.Log("Auto Attack: Truppen laufen zur Zeit nicht auf ("+x+","+y+") in der Truppen Aktivität. Dies ist der erste Angriff!");
 		return true;
 	},
 
@@ -1413,11 +1422,11 @@ var KOCAttack={
 		var x=ById('modal_attack_target_coords_x');
 		var y=ById('modal_attack_target_coords_y');
 		if(!x || !y) {
-			this.Log("Cannot find gui coords");
+			this.Log("Auto Attack: Finde keine GUI Koordinaten!");
 			return null;
 		}
 		if(x.value.length<1 || y.value.length<1){
-			this.Log("One or both coordinates are missing!");
+			this.Log("Auto Attack: eine oder beide Koordinaten fehlen!");
 			return null;
 		}
 		return [x.value,y.value];
@@ -1449,7 +1458,7 @@ var KOCAttack={
 		// then we assume something failed and we reset the multiple wave tracker so everything can continue.
 		if(timeDifference > waveTimerDelay && this.SendingMultipleWaves==true){
 			this.SendingMultipleWaves=false;
-			this.Log("Multiple wave timer \("+waveTimerDelay+"\ seconds) has expired. Last known attack was sent "+timeDifference+" seconds ago. Resetting timer and continuing...");
+			this.Log("Auto Attack: Multiwellen timer \("+waveTimerDelay+"\ Sekunden) sind vorbei. Letzter Angriff: "+timeDifference+" Sekunden, es wird ein Reset durchgeführt und von vorne angefangen!");
 		}
 		return this.SendingMultipleWaves;
 	},
@@ -1457,7 +1466,7 @@ var KOCAttack={
 	SetAttackFromGuiXY:function(x,y,box,isSuicideWave,locationType,resetTime) {
 	
 		if(resetTime==true){
-			this.Log("Resetting start times for attack ("+x+","+y+")");
+			this.Log("Auto Attack: Resette Laufzeiten für ("+x+","+y+")");
 		}
 		
 		// Determine location type
@@ -1497,11 +1506,11 @@ var KOCAttack={
 		var comment=ById('KocAttackComment');
 		var marchType = getAttackTypeSelected();	
 		if(marchType==null) {
-			throw("Cannot find attack type");
+			throw("Auto Attack: Finde den Angriffs Typ nicht!");
 		}
 
 		if(totalTroops<=0) {
-			this.Log("No troops, not saving attack");
+			this.Log("Auto Attack: keine Truppen, es werden keine Angriffe gespeichert!");
 			return null;
 		}
 
@@ -1516,19 +1525,19 @@ var KOCAttack={
 			if(comment){ attack.comment=comment.value; }
 			var SuicideAttackDefined=this.isSuicideAttackDefinedAtLocation(x,y);
 			var firstAttack=this.IsFirstAttackAtLocation(x,y);
-			this.Log("First attack?: "+firstAttack);
-			this.Log("Suicide attack defined? : "+SuicideAttackDefined);
+			this.Log("Auto Attack: erster Angriff?: "+firstAttack);
+			this.Log("Auto Attack: Kamikaze Welle definiert? : "+SuicideAttackDefined);
 
 			if(isSuicideWave) {
-				this.Log("Suicide attack determined by checkbox");
-				this.Log("Suicide wave :"+troops);
+				this.Log("Auto Attack: Kamikaze Welle eingeschaltet!");
+				this.Log("Auto Attack: Kamikaze Welle: "+troops);
 				attack.suicidewave=troops;
-				attack.currenttattackwavetype = "suicide";
+				attack.currenttattackwavetype = "kamikaze";
 				attack.suicidewavetime = nowSecs;
 				if(resetTime==true){ attack.suicidewavetime=monthAgo; }
 				this.SendingMultipleWaves = true;
 			} else {
-				this.Log("Normal wave :"+troops);
+				this.Log("Auto Attack: Normal Welle: "+troops);
 				attack.time=nowSecs;
 				if(resetTime==true){ attack.time=monthAgo; }
 				if(!SuicideAttackDefined && firstAttack){
@@ -1540,7 +1549,7 @@ var KOCAttack={
 			}
 			
 			//if (this.options.lockAttackFromCity) {
-			attack.fromCity=this.GetCurrentCityId();
+			attack.fromStadt=this.GetCurrentStadtId();
 			//}
 			
 			//Check if level is undefined
@@ -1551,7 +1560,7 @@ var KOCAttack={
 					locationType = attack.levelInfo.type;
 				}else{
 					// Default to camp if attack location type was absolutely not specified in any way
-					locationType = "Camp";
+					locationType = "Barbaren";
 				}
 			}
 			attack.levelInfo.type = locationType;
@@ -1597,7 +1606,7 @@ var KOCAttack={
 			attack.resources=resources;
 			
 			//if (this.options.lockAttackFromCity) {
-			attack.fromCity=this.GetCurrentCityId();
+			attack.fromStadt=this.GetCurrentStadtId();
 			//}
 			//attack.ignore=undefined;
 			
@@ -1633,17 +1642,17 @@ var KOCAttack={
 				}
 				if(manual_setting){
 					attack.currenttattackwavetype = manual_setting;
-				}else if(attack.suicidewave && attack.currenttattackwavetype == "bulkadded"){
-					attack.currenttattackwavetype = "suicide";
+				}else if(attack.suicidewave && attack.currenttattackwavetype == "koord"){
+					attack.currenttattackwavetype = "kamikaze";
 				}else{
 					// Toggle back and forth
 					if(attack.suicidewave && attack.currenttattackwavetype == "normal"){
-						attack.currenttattackwavetype = "suicide";
+						attack.currenttattackwavetype = "kamikaze";
 					}else{
 						attack.currenttattackwavetype = "normal";
 					}
 				}
-				this.Log("Toggling attack for ("+x+", "+y+") from "+previousattackwavetype+" to "+attack.currenttattackwavetype);
+				this.Log("Auto Attack: Toggle Angriff für ("+x+", "+y+") von "+previousattackwavetype+" nach "+attack.currenttattackwavetype);
 				if(original_attack.a){
 					original_attack.a = attack;
 					attack = original_attack;
@@ -1660,7 +1669,7 @@ var KOCAttack={
 
 	BulkAddCoords:function(box,coordsText,force,locationType,isSuicideWave) {
 		if(!locationType){
-			var locationType = "Camp"; //Default to camp
+			var locationType = "Barbaren"; //Default to camp
 		}
 		if(!isSuicideWave){
 			var isSuicideWave = false;
@@ -1678,7 +1687,7 @@ var KOCAttack={
 			var y=m[2];
 			var attack=this.GetAttack(x,y);
 			
-			var currenttattackwavetype = "bulkadded";
+			var currenttattackwavetype = "koord";
 			if(locationType=="Transport"){
 				currenttattackwavetype = "transport";
 			}
@@ -1690,17 +1699,17 @@ var KOCAttack={
 			
 			if(attack && !force) {
 				if(SuicideAttackDefined && isSuicideWave==true){
-					this.Log('Suicide wave for '+x+','+y+' has already been added. Try over-writing it.');
+					this.Log('Auto Attack: Kamikaze Welle für '+x+','+y+' wurde bereits Hinzugefügt! Versuch sie zu Überschreiben!');
 					continue;
 				}else if(attack.troops){
-					this.Log('Attack wave for '+x+','+y+' has already been added. Try over-writing it.');
+					this.Log('Auto Attack: Angriffs Welle für '+x+','+y+' wurde bereits Hinzugefügt! Versuch sie zu Überschreiben!');
 					continue;
 				}
 			}
 			var attack=this.SetAttackFromGuiXY(x,y,box,isSuicideWave,locationType);
 			if(attack) {
 				attack.levelInfo={'type':locationType,'level':0};
-				attack.fromCity=this.GetCurrentCityId();
+				attack.fromStadt=this.GetCurrentStadtId();
 				var nowSecs=new Date().getTime()/1000;
 				var monthAgo=nowSecs-(60*60*24*31);
 				attack.time=monthAgo;
@@ -1708,15 +1717,15 @@ var KOCAttack={
 					// set up suicide wave before attack time, according to "seconds in between sending each attack"
 					attack.suicidewavetime = attack.time - this.options.attackDelay;
 					if(previous_suicidewave && (!SuicideAttackDefined || !isSuicideWave)){
-						this.Log("Previous suicide wave for this attack was over-written by new attack. Merging and restoring...");
+						this.Log("Auto Attack: Letzte Kamikaze Welle für diesen Angriff wurde überschrieben von einem Neuen Angriff! füge Daten zusammen und stelle die Datenbank wieder her!");
 						attack.suicidewave = previous_suicidewave;
 					}
 				}
 				attack.ignore=undefined;
 				attack.currenttattackwavetype=currenttattackwavetype;
 				this.SetAttack(x,y,attack);
-				this.Log(x+','+y+' attack added: '+inspect(attack));
-				this.Log("current attack wave type: "+attack.currenttattackwavetype);
+				this.Log(x+','+y+' Angriff Hinzugefügt: '+inspect(attack));
+				this.Log("Auto Attack: Aktueller Angriffs Wellen Typ: "+attack.currenttattackwavetype);
 				added++;
 			}
 		}
@@ -1742,13 +1751,13 @@ var KOCAttack={
 		bulkAddTable.insertRow(-1).insertCell(-1).appendChild(bulkAddDiv);
 		bulkAddDiv.style.display='none';
 		//AddHtml(bulkAddDiv,"<hr />");
-		AddHtml(bulkAddDiv,"Copy and paste coords here (ie. 343,434) one on each line...<br />Note: it will only add the target using the current number of troops on this screen.<br /><input id='KOCAttackBulkAddForce' type='checkbox' /> <label for=\"KOCAttackBulkAddForce\">Overwrite existing attack if one already exists</label><br />");
+		AddHtml(bulkAddDiv,"<u>Hinweis</u>: Kopiere die Koordinaten einfach <u>Zeile</u> für <u>Zeile</u> in den Kasten!<br /><u>Wichtig</u>: Die Koordinaten werden mit der <b>Truppenstärke</b> die du <u>oben eingetragen</u> hast, angegriffen!<br /><input id='KOCAttackBulkAddForce' type='checkbox' /> <label for=\"KOCAttackBulkAddForce\">Überschreibe alte Angriffe!</label><br />");
 
 		
 		// radio boxes for defining bulk coordinate type
 		AddHtml(bulkAddDiv,"<hr />");
-		AddHtml(bulkAddDiv,"Type of Locations (All coordinates must match this type):<br />");
-		var arrData = [["Camp", "Camps"],["City", "City"],["Transport", "Transport"],["Wilderness", "Wildernesses"]];
+		AddHtml(bulkAddDiv,"Typ der Koordinaten <font color=#600000>(Alle Koordinaten müssen den Gleichen typ entsprechen!)</span><br />");
+		var arrData = [["Barbaren", "Barbaren Lager"],["Stadt", "Städte"],["Transport", "Transport"],["Wildniss", "Wildnisse"]];
 		for (var i=0; i < arrData.length; i++){
 			var objRadItem = document.createElement("input");
 			objRadItem.type = "radio";
@@ -1768,7 +1777,7 @@ var KOCAttack={
 			bulkAddDiv.appendChild(objLabel);
 			
 			objRadItem.addEventListener('change',function() {
-				var locationType = "Camp"; // Set default value to camp
+				var locationType = "Barbaren"; // Set default value to camp
 				var bulkLocationTypeRadioBoxes = ByName('KOCAttackBulkAddLocationType');
 				if(bulkLocationTypeRadioBoxes){
 					for(var i = 0; i < bulkLocationTypeRadioBoxes.length; i++) {
@@ -1803,19 +1812,19 @@ var KOCAttack={
 		bulkAddSuicideCheckbox.name = bulkAddSuicideCheckbox.id;
 		bulkAddSuicideCheckbox.type='checkbox';
 		bulkAddSuicideSpan.appendChild(bulkAddSuicideCheckbox);
-		AddHtml(bulkAddSuicideSpan,'<label for="KOCAttackBulkAddSuicideWave">This is an initial suicide wave to wipe out traps on a wilderness.</label>');
+		AddHtml(bulkAddSuicideSpan,'<label for="KOCAttackBulkAddSuicideWave">Kamikaze Welle(n) <font color=#600000>(2 Wellen Taktik)</font></label>');
 		bulkAddDiv.appendChild(bulkAddSuicideSpan);
 		
 		bulkAddSuicideCheckbox.addEventListener('click',function() {
 			var bulkAddSuicideWaveCheckbox = ById("KOCAttackBulkAddSuicideWave");
 			var suicideWaveCheckbox = ById("KOCAttackSuicideWaveCheckbox");
-			var locationType_Wilderness = ById("KOCAttackLocationType_Wilderness");
-			var bulkAddLocationType_Wilderness = ById("KOCAttackBulkAddLocationType_Wilderness");
-			if(bulkAddSuicideWaveCheckbox && suicideWaveCheckbox && locationType_Wilderness && bulkAddLocationType_Wilderness){
+			var locationType_Wildniss = ById("KOCAttackLocationType_Wildniss");
+			var bulkAddLocationType_Wildniss = ById("KOCAttackBulkAddLocationType_Wildniss");
+			if(bulkAddSuicideWaveCheckbox && suicideWaveCheckbox && locationType_Wildniss && bulkAddLocationType_Wildniss){
 				if(bulkAddSuicideCheckbox.checked){
 					suicideWaveCheckbox.checked = true;
-					locationType_Wilderness.checked = true;
-					bulkAddLocationType_Wilderness.checked = true;
+					locationType_Wildniss.checked = true;
+					bulkAddLocationType_Wildniss.checked = true;
 				}else{
 					suicideWaveCheckbox.checked = false;
 				}
@@ -1833,11 +1842,11 @@ var KOCAttack={
 		AddHtml(bulkAddDiv,"<br />");
 		var bulkAdd=document.createElement('a');
 		bulkAdd.className='buttonDown20';
-		bulkAdd.innerHTML='<span>Bulk Add</span>';
+		bulkAdd.innerHTML='<span>Speichern</span>';
 		bulkAddDiv.appendChild(bulkAdd);
 		bulkAdd.addEventListener('click',function() {
 			// Determine location type
-			var locationType = "Camp"; // Set default value to camp
+			var locationType = "Barbaren"; // Set default value to camp
 			var locationTypeRadioBoxes = ByName('KOCAttackBulkAddLocationType');
 			if(locationTypeRadioBoxes){
 				for(var i = 0; i < locationTypeRadioBoxes.length; i++) {
@@ -1858,13 +1867,13 @@ var KOCAttack={
 			var added=t.BulkAddCoords(box,coords.value,ById('KOCAttackBulkAddForce').checked,locationType,isSuicideWave);
 			bulkAddDiv.style.display='none'; 
 			bulkAddAttackLink.style.display='inline';
-			window.alert('Bulk added '+added+' coords');
+			window.alert(' '+added+' Koordinaten erfolgreich Hinzugefügt!');
 		},false);
 		AddHtml(bulkAddDiv,"<br />");
 
 		var bulkAddAttackLink=document.createElement('a');
 		bulkAddAttackLink.className='buttonDown20';
-		bulkAddAttackLink.innerHTML='<span>Bulk add coords</span>';
+		bulkAddAttackLink.innerHTML='<span>Koordinaten Manager</span>';
 		bulkAddAttackLink.addEventListener('click',function() { 
 			if(bulkAddDiv.style.display=='inline'){
 				bulkAddDiv.style.display='none'; 
@@ -1885,7 +1894,7 @@ var KOCAttack={
 		var span = document.createElement('span');
 		var a = document.createElement('a');
 		//var txt = document.createElement('text'); 
-		a.innerHTML = 'Hide Attack/Speed Boosts';
+		a.innerHTML = 'Gegenstände Ein/Ausblenden';
 		//inp.type='checkbox';
 		span.appendChild(a);
 		//span.appendChild (txt);
@@ -1912,10 +1921,10 @@ var KOCAttack={
 				if(KOCAttackBulkAddLocationType_Transport) { KOCAttackBulkAddLocationType_Transport.checked = true; }
 			}else{
 				// Default back to Camp
-				var KOCAttackLocationType_Camp = ById("KOCAttackLocationType_Camp");
-				if(KOCAttackLocationType_Camp) { KOCAttackLocationType_Camp.checked = true; }
-				var KOCAttackBulkAddLocationType_Camp = ById("KOCAttackBulkAddLocationType_Camp");
-				if(KOCAttackBulkAddLocationType_Camp) { KOCAttackBulkAddLocationType_Camp.checked = true; }
+				var KOCAttackLocationType_Barbaren = ById("KOCAttackLocationType_Barbaren");
+				if(KOCAttackLocationType_Barbaren) { KOCAttackLocationType_Barbaren.checked = true; }
+				var KOCAttackBulkAddLocationType_Barbaren = ById("KOCAttackBulkAddLocationType_Barbaren");
+				if(KOCAttackBulkAddLocationType_Barbaren) { KOCAttackBulkAddLocationType_Barbaren.checked = true; }
 			}
 		}
 		
@@ -1968,7 +1977,7 @@ var KOCAttack={
 
 		if(parseInt(resourceCount)>0) {
 			if(resource.value!=resourceCount) {
-				this.Log('Not able to set resource count:'+num+',wanted:'+resourceCount+', count:'+resource.value);
+				this.Log('Auto Attack: Nicht möglich Ressourcen zu Transportieren: '+num+', Benötige:'+resourceCount+', Vorhanden:'+resource.value);
 				resource.style.backgroundColor='#f88';
 				return 'notfull';
 			} else {
@@ -1997,7 +2006,7 @@ var KOCAttack={
 
 		if(parseInt(troopCount)>0) {
 			if(troop.value!=troopCount) {
-				this.Log('Not able to set troop count:'+num+',wanted:'+troopCount+', count:'+troop.value);
+				this.Log('Auto Attack: Nicht möglich Ressourcen zu Transportieren: '+num+', Benötige:'+troopCount+', Vorhanden:'+troop.value);
 				troop.style.backgroundColor='#f88';
 				return 'notfull';
 			} else {
@@ -2015,22 +2024,22 @@ var KOCAttack={
 	},
 
 	GetAutoGold:function() {
-		return this.GetValue('AutoGold,'+this.GetCurrentCityId(),true);
+		return this.GetValue('AutoGold,'+this.GetCurrentStadtId(),true);
 	},
 	SetAutoGold:function(v) {
-		return this.SetValue('AutoGold,'+this.GetCurrentCityId(),v);
+		return this.SetValue('AutoGold,'+this.GetCurrentStadtId(),v);
 	},
 
 	GetAbandonWilds:function() {
-		return this.GetValue('AbandonWilds_'+this.GetCurrentCityId(),false);
+		return this.GetValue('AbandonWilds_'+this.GetCurrentStadtId(),false);
 	},
 	SetAbandonWilds:function(v) {
-		return this.SetValue('AbandonWilds_'+this.GetCurrentCityId(),v);
+		return this.SetValue('AbandonWilds_'+this.GetCurrentStadtId(),v);
 	},
 
 	CheckAutoRaiseGold:function() {
 		if(!this.GetAutoGold()) return;
-		var happiness=parseInt(this.GetSeed().citystats["city" + this.GetCurrentCityId()].pop[2]);
+		var happiness=parseInt(this.GetSeed().citystats["city" + this.GetCurrentStadtId()].pop[2]);
 		
 		if(happiness>=this.options.autoGoldHappiness) {
 			this.DoUnsafeWindow("modal_raise_gold();");
@@ -2185,10 +2194,10 @@ var KOCAttack={
 					// Hide alliance reports in chat
 					if(this.options.hideAllianceHelpRequests){
 						// Look for any alliance assist links in this current post item
-						var myregexp1 = /You are # [1-5] of 5 to help/i;
-						var myregexp2 = /\'s Kingdom does not need help\./i;
-						var myregexp3 = /\'s project has already been completed\./i;
-						var myregexp4 = /\'s project has received the maximum amount of help\./i;
+						var myregexp1 = /Du bist Hilfe Nr. # [1-5] von 5 bei/i;
+						var myregexp2 = /\'s braucht keine Hilfe\./i;
+						var myregexp3 = /\'s wurde schon beendet\./i;
+						var myregexp4 = /\'s hat schon die maximal mögliche Hilfe erhalten\./i;
 						if (thisPost.innerHTML.match(myregexp1) || thisPost.innerHTML.match(myregexp2) || thisPost.innerHTML.match(myregexp3) || thisPost.innerHTML.match(myregexp4)) {
 							// Delete the post item from the DOM
 							thisPost.parentNode.removeChild(thisPost);
@@ -2264,12 +2273,12 @@ var KOCAttack={
 				//var firstPlayButton = playButtons.snapshotItem(0);
 				//var domain_name = firstPlayButton.parentNode.parentNode.firstChild.innerHTML;
 				//statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging into '+domain_name+' in '+timeDifference+' seconds...</center>';
-				statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging back into KoC in '+timeDifference+' seconds...</center>';
+				statusDiv.innerHTML='<center>KoC Attack - Deutsch: Automatischer Refresh in '+timeDifference+' Sekunden!</center>';
 				if(timeDifference==0){
 					//t.Log("Loading URL: "+firstPlayButton.href);
 					t.Log("Loading URL: http://apps.facebook.com/kingdomsofcamelot/");
 					//statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging into '+domain_name+' now...</center>';
-					statusDiv.innerHTML='<center>KoCAttack Extra: Automatically logging back into KoC now...</center>';
+					statusDiv.innerHTML='<center>KoC Attack - Deutsch: lade KoC jetzt neu!</center>';
 					var functionCall = {
 						'action':'load_url',
 						//'parameters':firstPlayButton.href
@@ -2283,9 +2292,9 @@ var KOCAttack={
 					},10000);
 				}
 			}else{
-				statusDiv.innerHTML='<center>KoCAttack Extra: Automatically reloading page in '+timeDifference+' seconds...</center>';
+				statusDiv.innerHTML='<center>KoC Attack - Deutsch: Refresh die seite in '+timeDifference+' Sekudnen!</center>';
 				if(timeDifference==0){
-					statusDiv.innerHTML='<center>KoCAttack Extra: Automatically reloading page now...</center>';
+					statusDiv.innerHTML='<center>KoC Attack - Deutsch: Lade jetzt KoC neu!</center>';
 					t.ReloadWindow();
 					t.domainLoginActionTaken=true;
 				}
@@ -2335,7 +2344,7 @@ var KOCAttack={
 		var t=this;
 		
 		function SetAutoGoldA() {
-			var str=t.GetAutoGold()?'Auto - On':'Auto - Off';
+			var str=t.GetAutoGold()?'Auto - AN':'Auto - AUS';
 			a.innerHTML='<span>'+str+'</span>';
 		}
 		a.addEventListener('click',function() {
@@ -2352,13 +2361,13 @@ var KOCAttack={
 		b.className='button25';
 		
 		function SetAbandonWildsA() {
-			var str=t.GetAbandonWilds()?'Abandon Wilds - On':'Abandon Wilds - Off';
+			var str=t.GetAbandonWilds()?'Wildniss Aufgeben - AN':'Wildniss Aufgeben - AN';
 			b.innerHTML='<span>'+str+'</span>';
 		}
 		b.addEventListener('click',function() {
 			var abandonWilds=t.GetAbandonWilds();
 			if(!abandonWilds){
-				var abandonWildsConfirm = confirm("Are you sure you want to automatically abandon all wildernesses?\n")
+				var abandonWildsConfirm = confirm("Bist du Sicher das du Wildnisse Automatisch Aufgeben möchtest?\n")
 				if (!abandonWildsConfirm){
 					return false;
 				}
@@ -2403,7 +2412,7 @@ var KOCAttack={
 		var btnMarch=ById('btnMarch');
 		var t=this;
 		if(!btnMarch) { 
-			this.Log('no march button');
+			this.Log('Auto Attack: Kein Marsch Button');
 			window.setTimeout(function() {
 				t.OnAttackBoxAppear(box);
 			},1000);
@@ -2412,7 +2421,7 @@ var KOCAttack={
 
 		this.StopWaitForAttackBoxAppear();
 		if(ById('KocAttackComment')) {
-			this.Log("We already have an attack dialog opened");
+			this.Log("Auto Attack: Es ist bereits ein Angriffs Dialog offen!");
 			return;
 		}
 		
@@ -2435,7 +2444,7 @@ var KOCAttack={
 		var addBtn=document.createElement('a');
 		addBtn.className='button25';
 		addBtn.style.cssFloat="left";
-		addBtn.innerHTML='<span>Add Attack</span>';
+		addBtn.innerHTML='<span>Hinzufügen</span>';
 		addBtn.addEventListener('click',function() {
 			t.ClickMarch(null, box, true, true);
 		},false);
@@ -2451,7 +2460,7 @@ var KOCAttack={
 		locationTypeDiv.style.fontSize="10px";
 		locationTypeDiv.style.textAlign="left";
 		// radio boxes for defining bulk coordinate type
-		var arrData = [["Camp", "Camp"],["City", "City"],["Transport", "Transport"],["Wilderness", "Wilderness"]];
+		var arrData = [["Barbaren", "Barbaren"],["Stadt", "Städte"],["Transport", "Transport"],["Wildniss", "Wildnisse"]];
 		for (var i=0; i < arrData.length; i++){
 			var objRadItem = document.createElement("input");
 			objRadItem.type = "radio";
@@ -2471,7 +2480,7 @@ var KOCAttack={
 			locationTypeDiv.appendChild(objLabel);
 			
 			objRadItem.addEventListener('change',function() {
-				var locationType = "Camp"; // Set default value to camp
+				var locationType = "Barbaren"; // Set default value to camp
 				var locationTypeRadioBoxes = ByName('KOCAttackLocationType');
 				if(locationTypeRadioBoxes){
 					for(var i = 0; i < locationTypeRadioBoxes.length; i++) {
@@ -2504,17 +2513,17 @@ var KOCAttack={
 		suicideCheckbox.name = suicideCheckbox.id;
 		suicideCheckbox.type='checkbox';
 		suicideSpan.appendChild(suicideCheckbox);
-		AddHtml(suicideSpan,'<label for="KOCAttackSuicideWaveCheckbox">This is a suicide wave</label>');
+		AddHtml(suicideSpan,'<label for="KOCAttackSuicideWaveCheckbox">Kamikaze Welle(n)</label>');
 		addAttackDiv.appendChild(suicideSpan);
 		suicideCheckbox.addEventListener('click',function() {
 			var bulkAddSuicideWaveCheckbox = ById("KOCAttackBulkAddSuicideWave");
-			var locationType_Wilderness = ById("KOCAttackLocationType_Wilderness");
-			var bulkAddLocationType_Wilderness = ById("KOCAttackBulkAddLocationType_Wilderness");
-			if(bulkAddSuicideWaveCheckbox && locationType_Wilderness && bulkAddLocationType_Wilderness){
+			var locationType_Wildniss = ById("KOCAttackLocationType_Wildniss");
+			var bulkAddLocationType_Wildniss = ById("KOCAttackBulkAddLocationType_Wildniss");
+			if(bulkAddSuicideWaveCheckbox && locationType_Wildniss && bulkAddLocationType_Wildniss){
 				if(suicideCheckbox.checked){
 					bulkAddSuicideWaveCheckbox.checked = true;
-					locationType_Wilderness.checked = true;
-					bulkAddLocationType_Wilderness.checked = true;
+					locationType_Wildniss.checked = true;
+					bulkAddLocationType_Wildniss.checked = true;
 				}else{
 					bulkAddSuicideWaveCheckbox.checked = false;
 				}
@@ -2532,7 +2541,7 @@ var KOCAttack={
 		var nowSecs=new Date().getTime()/1000;
 
 		var div=document.createElement('div');
-		AddText(div,'Comment:');
+		AddText(div,'Kommentar:');
 		div.appendChild(comment);
 		div.appendChild(document.createElement('br'));
 
@@ -2540,13 +2549,13 @@ var KOCAttack={
 		var ignore=document.createElement('input');
 		ignore.type='checkbox';
 		div2.appendChild(ignore);
-		AddText(div2,'Ignore in the attack list');
+		AddText(div2,'In der Angriffs Liste Igrnorieren!');
 		
 		var div3=document.createElement('div');
 		var deletefarmno=document.createElement('input');
 		deletefarmno.type='checkbox';
 		div3.appendChild(deletefarmno);
-		AddText(div3,'Do not delete this report');
+		AddText(div3,'Berichte nicht Löschen!');
 		
 		var nextElement=ById('marchTypeDesc');
 		//nextElement.parentNode.insertBefore(div2, nextElement.nextSibling);
@@ -2570,7 +2579,7 @@ var KOCAttack={
 			ignore.checked=attack.ignore?true:false;
 			deletefarmno.checked=attack.deletefarmno?true:false;
 			if(attack.time) {
-				AddHtml(div,'Last attack: '+SecsToStr(nowSecs-attack.time)+' ago<br />');
+				AddHtml(div,'Letzter Angriff: '+SecsToStr(nowSecs-attack.time)+' <br />');
 			}
 			if(attack.comment){
 				comment.value=attack.comment;
@@ -2578,17 +2587,17 @@ var KOCAttack={
 			
 			// Select the attack type radio boxes
 			var wildtype={
-				'Lake':'Wilderness',
-				'Mountains':'Wilderness',
-				'Woods':'Wilderness',
-				'Forest':'Wilderness',
-				'Plain':'Wilderness',
-				'Hills':'Wilderness',
-				'Grassland':'Wilderness',
-				'Wilderness':'Wilderness' // Unknown wilderness type
+				'See':'Wildniss',
+				'Berg':'Wildniss',
+				'Wald':'Wildniss',
+				'Wälder':'Wildniss',
+				'Ebene':'Wildniss',
+				'Hügel':'Wildniss',
+				'Grassland':'Wildniss',
+				'Wildniss':'Wildniss' // Unknown wilderness type
 			};
 			var levelInfo=this.GetLevelInfo(attack);
-			var locationType = "City"; // Default to city
+			var locationType = "Stadt"; // Default to city
 			if(levelInfo && levelInfo.type) {
 				locationType = levelInfo.type;
 			}
@@ -2619,9 +2628,9 @@ var KOCAttack={
 			// only fill things in if we're in attack mode.
 			if(attackTypeSelected==0 && attack.type==0) { // if 'attack' mode
 				SuicideAttackDefined = this.isSuicideAttackDefinedAtLocation(xy[0], xy[1])
-				if(this.prevAttack) { this.Log('Previous attack:'+this.prevAttack.x+'=='+xy[0] +','+this.prevAttack.y+'=='+xy[1] ); }
+				if(this.prevAttack) { this.Log('Auto Attack: vorheriger Angriff: '+this.prevAttack.x+'=='+xy[0] +','+this.prevAttack.y+'=='+xy[1] ); }
 				var firstAttack = this.IsFirstAttackAtLocation(xy[0], xy[1]);
-				this.Log("current attack wave type: "+attack.currenttattackwavetype);
+				this.Log("Auto Attack: Aktueller Angriffs Wellen Typ: "+attack.currenttattackwavetype);
 				if(SuicideAttackDefined && firstAttack) {
 					// anti traps suicide wave attack
 					if(typeof(attack.suicidewave)=="object") {
@@ -2678,7 +2687,7 @@ var KOCAttack={
 					totalTroops+=troopCount;
 
 					if(this.SetTroopInput(tr,troopCount)=='notfull') {
-						this.Log("Input field disabled for troop type: "+tr);
+						this.Log("Auto Attack: Felder deaktiviert für den Truppen Typ: "+tr);
 						notFullTroops=true;
 					}
 				}
@@ -2705,7 +2714,7 @@ var KOCAttack={
 					var timeNumM=this.onclickTimeRe.exec(message[1]);
 					if(timeNumM) {
 						var secs=nowSecs-parseInt(timeNumM[1]);
-						mess=SecsToStr(secs)+' ago, '+mess;
+						mess=SecsToStr(secs)+' - '+mess;
 						//mess=(new Date(parseFloat(timeNumM[1])*1000).toLocalString())+', '+mess;
 					}
 					ma.innerHTML=mess;
@@ -2731,7 +2740,7 @@ var KOCAttack={
 			
 			var deleteBtn=document.createElement('a');
 			deleteBtn.className='button25';
-			deleteBtn.innerHTML='<span>Delete Attack</span>';
+			deleteBtn.innerHTML='<span>Löschen</span>';
 			deleteBtn.addEventListener('click',function() {
 				t.DeleteAttack(xy[0],xy[1]);
 				t.DoUnsafeWindow('Modal.hideModalAll();');
@@ -2750,7 +2759,7 @@ var KOCAttack={
 			}
 			if(!attack) attack={};
 			if(getAttackTypeSelected()!=attack.type) {
-				t.Log('We wont change an attack if the type is different. You must delete the attack to change the type');
+				t.Log('Auto Attack: Der Typ der Angriffe muss gleich sein, er wird nicht gewechselt! Lösche den alten Angriff um den Typ zu wechseln!');
 				return;
 			}
 			
@@ -2787,10 +2796,10 @@ var KOCAttack={
 			&& !notFullResources
 			&& btnMarch.className.indexOf('grey')<0
 			) {
-				this.Log('Auto attack: '+xy[0]+','+xy[1]+', from city:'+this.autoAttackCityUpto);
+				this.Log('Auto Attack: '+xy[0]+','+xy[1]+', vom Heiligtum:'+this.autoAttackStadtUpto);
 				var t=this;
 				window.setTimeout(function() {
-					t.autoAttacksThisCity++;
+					t.autoAttacksThisStadt++;
 					t.ClickMarch(btnMarch, box, false);
 					this.knightmarchid = knightSelect.options[knightSelect.selectedIndex].value;
 					//t.ResetIdStatus();
@@ -2804,13 +2813,13 @@ var KOCAttack={
 						
 					},t.GetRandTime(1000*this.options.attackDelay));
 				} else {
-					this.Log('Cannot continue auto attacking, about to attack or change city');
+					this.Log('Auto Attack: kann die Angriffe nicht fortsetzten, wechsel grade die Stadt');
 				}
 				return;
 			} else {
-				this.Log('Unable to send attack to '+xy[0]+','+xy[1]+', knights avail:'+(knightSelect.options.length-1)+', Not enough troops: '+notFullTroops+'(need '+totalTroops+'). Not enough resources:'+notFullResources+' (need '+totalResources+')');
+				this.Log('Auto Attack: Angriff nicht möglich! '+xy[0]+','+xy[1]+', Ritter:'+(knightSelect.options.length-1)+', Nicht genügend Truppen: '+notFullTroops+'(need '+totalTroops+'). nicht genügend Ressourcen:'+notFullResources+' (benötige '+totalResources+')');
 				this.DoUnsafeWindow("Modal.hideModal();");
-				this.NextAutoAttackCity();
+				this.NextAutoAttackStadt();
 			}
 		}
 	},
@@ -2832,7 +2841,7 @@ var KOCAttack={
 		t.SetValuesCache();
 		if(added){
 			if(alert){
-				window.alert("Added attack");
+				window.alert("KoC Attack - Deutsch: Angriff Hinzugefügt!");
 			}
 		}
 	},
@@ -2864,7 +2873,7 @@ var KOCAttack={
 		if(troops && troops.length>0) {
 			var lastAttack=parseInt(attack.time);
 			var nowSecs=new Date().getTime()/1000;
-			var lastAttackStr='Last attack: '+SecsToStr(nowSecs-lastAttack)+' ago'+(attack.ignore?' <b>(ignore)</b> ':'');
+			var lastAttackStr='Letzter Angriff: '+SecsToStr(nowSecs-lastAttack)+' - '+(attack.ignore?' <b>(Ignorieren)</b> ':'');
 			AddHtml(box1,lastAttackStr+'<br />');
 			if(attack.comment) {
 				AddHtml(box1,attack.comment+'<br />');
@@ -2904,32 +2913,32 @@ var KOCAttack={
 	//attackRe:/\s+(\S+)\s+Lv\.\s*([0-9]+)/,
 	//javascript:Messages.viewMarchReport("22891795",0,51,10,1550996,"oftheNOOBS","M","Debby32","F",1,430,205,1302284981,1,284,83);
 	squareTypeNums:{
-	'51':'Camp',
+	'51':'Barbaren',
 	'10':'Grassland',
-	'11':'Lake',
-	'20':'Forest',
-	'30':'Hills',
-	'40':'Mountains',
-	'50':'Plain',
-	'0':'Bog'
+	'11':'See',
+	'20':'Wälder',
+	'30':'Hügel',
+	'40':'Berg',
+	'50':'Ebene',
+	'0':'Moor'
 	},
 	FindLevelFromMessages:function(attack) {
 		if(!attack || !attack.messages) return null;
 		for(var a=0; a<attack.messages.length; a++) {
 			var m=this.onclickReportRe.exec(attack.messages[a][1]);
 			if(!m) {
-				this.Log("Unable to find location level/type information in cached reports!");
+				this.Log("Auto Attack: kann keine Level/Typ Information für die Koordinate in den Cache Berichten finden!");
 				continue;
 			}
 			var typeNum=m[3].replace('"','');
 			var type=this.squareTypeNums[typeNum];
 			if(!type) {
-				this.Log("Unable to find location type information in cached reports!");
+				this.Log("Auto Attack: kann keine Typ Information für die Koordinate in den Cache Berichten finden!");
 				continue;
 			}
 			if(typeNum=="51" && m[5]!='0') { //Gradually replace all attack types to follow Tom's new method of storing attacks
 				if(attack.type==0){
-					type='City';
+					type='Stadt';
 				} else if (attack.type==1){
 					type='Transport';
 				}
@@ -2959,7 +2968,7 @@ var KOCAttack={
 					var might=onclickM[7].StripQuotes();
 					//var alliance=onclickM[9].StripQuotes();
 					//+"<br />"+(alliance=="null"?"":alliance);
-					owner=" "+onclickM[6].StripQuotes()+'<br />Might:'+might;
+					owner=" "+onclickM[6].StripQuotes()+'<br />Macht:'+might;
 				}
 			}
 			var m=lvRe.exec(a.className);
@@ -2978,7 +2987,7 @@ var KOCAttack={
 	AttachXYPaste:function(xId,yId,func) {
 		var x=ById(xId);
 		if(!x) {
-			this.Log('Cannot find x coord box: '+xId);
+			this.Log('Auto Attack: kann X Koordinaten Box nicht finden: '+xId);
 			return;
 		}
 		var attached=x.getAttribute('KOCpasteAttached');
@@ -3111,10 +3120,10 @@ var KOCAttack={
 	},
 
 	GetLevelInfo:function(attack) {
-		if(!attack) throw('GetLevelInfo: attack is null');
+		if(!attack) throw('GetLevelInfo: angriff ist null');
 		var levelI=attack.levelInfo;
 		//if((!levelI || levelI.level==0) && attack.messages && attack.messages.length>0) {
-		if((!levelI || levelI.level==0 || levelI.type=="" || levelI.type=="Camp") && attack.messages && attack.messages.length>0) { //The idea is to replace all old attacks with the new one
+		if((!levelI || levelI.level==0 || levelI.type=="" || levelI.type=="Barbaren") && attack.messages && attack.messages.length>0) { //The idea is to replace all old attacks with the new one
 			levelI=this.FindLevelFromMessages(attack);
 		}
 		
@@ -3122,143 +3131,143 @@ var KOCAttack={
 		  return {'type':'Transport','level':0};
 		}
 		// if (!levelI){
-		  // return {'type':'Camp','level':0}; // Default to camp
+		  // return {'type':'Barbaren','level':0}; // Default to camp
 		// }
 		//All old attacks for city are stored as "" So disable this option for the mean time
-		//if(levelI.type==""){levelI.type="Camp";}
+		//if(levelI.type==""){levelI.type="Barbaren";}
 		return levelI;
 	},
 
 	GetAttackDelay:function(attack) {
-		if(!attack) throw('GetAttackDelay: attack is null');
+		if(!attack) throw('GetAttackDelay: angriff ist null');
 		var attackDelay = 0;
 		var wilderness={
-			'Lake':1,
-			'Mountains':1,
-			'Woods':1,
-			'Forest':1,
-			'Plain':1,
-			'Hills':1,
+			'See':1,
+			'Berg':1,
+			'Wald':1,
+			'Wälder':1,
+			'Ebene':1,
+			'Hügel':1,
 			'Grassland':1,
-			'Wilderness':1 // Unknown wilderness type
+			'Wildniss':1 // Unknown wilderness type
 		};
 		var levelInfo=this.GetLevelInfo(attack);
 		if(!levelInfo) {
-			this.Log("Unable to calculate attack delay: Missing level info for coordinates ("+attack.x+","+attack.y+"). Assuming delay of 0.");
+			this.Log("Auto Attack: kann den Angriffs delay nicht berechnen: keine Level Information für ("+attack.x+","+attack.y+"). der Delay wird auf 0 gesetz!");
 		}else{
-			if(levelInfo.type=='Camp') {
-				// Camp
-				attackDelay = this.options.attackSecsSinceLastCamp;
+			if(levelInfo.type=='Barbaren') {
+				// Barbaren
+				attackDelay = this.options.attackSecsSinceLastBarbaren;
 			} else if(wilderness[levelInfo.type]) {
-				// Wilderness
+				// Wildniss
 				attackDelay = this.options.attackSecsSinceLastWild;
-			} else if (levelInfo.type!='Camp' && !wilderness[levelInfo.type]) {
+			} else if (levelInfo.type!='Barbaren' && !wilderness[levelInfo.type]) {
 				var tempAttack=this.GetAttack(attack.x,attack.y);
 				if(tempAttack){
 					if(tempAttack.type==0) {
-						// City
-						attackDelay = this.options.attackSecsSinceLastCity;
+						// Stadt
+						attackDelay = this.options.attackSecsSinceLastStadt;
 					} else if(tempAttack.type==1) {
 						// Transport
 						attackDelay = this.options.attackSecsSinceLastTransport;
 					}else{
-						this.Log("Unknown attack type for ("+attack.x+","+attack.y+"). Assuming delay of 0.");
+						this.Log("Auto Attack: Unbekannter Angriffs Typ für ("+attack.x+","+attack.y+"). der Delay wird auf 0 gesetz!");
 					}
 				}else{
-					this.Log("Unknown/Invalid attack specified ("+attack.x+","+attack.y+").");
+					this.Log("Auto Attack: Unbekannt/Ungültiger Angriff angegeben ("+attack.x+","+attack.y+").");
 				}
 			}else{
-				this.Log("Unknown attack type for ("+attack.x+","+attack.y+"). Assuming delay of 0.");
+				this.Log("Auto Attack: Unbekannter Angriffs Typ für ("+attack.x+","+attack.y+"). der Delay wird auf 0 gesetz!");
 			}
 		}
 		return attackDelay;
 	},
 	
 	priorityattack:true,
-	FindBiggestCampAttack:function(attacks,currentTroops,currentResources) {
+	FindBiggestBarbarenAttack:function(attacks,currentTroops,currentResources) {
 		var bestAttack=null;
 		var bestAttackSize=0;
 		var bestAttackDist=10000;
 		var nowSecs=new Date().getTime()/1000;
-		var currentCity = this.GetCurrentCityId();
+		var currentStadt = this.GetCurrentStadtId();
 		// Determine the current rally point level and current marches
 		this.DetermineCurrentRallyPointLevel();
 		this.DetermineCurrentMarchesNum();
-		this.Log("Current Rally Point Level: "+this.currentRallyPointLevel+" Current Marches: "+this.currentMarchesNum);
+		this.Log("Auto Attack: Versammlungspunkt Level: "+this.currentRallyPointLevel+" - Märsche: "+this.currentMarchesNum);
 
 		var wilderness={
-			'Lake':1,
-			'Mountains':1,
-			'Woods':1,
-			'Forest':1,
-			'Plain':1,
-			'Hills':1,
+			'See':1,
+			'Berg':1,
+			'Wald':1,
+			'Wälder':1,
+			'Ebene':1,
+			'Hügel':1,
 			'Grassland':1,
-			'Wilderness':1 // Unknown wilderness type
+			'Wildniss':1 // Unknown wilderness type
 		};
 		for(var a=0; a<attacks.length; a++) {
 			var attack=attacks[a];
 			//this.Log("Inspecting attack #"+a+": "+inspect(attack,10));
 			var levelInfo=this.GetLevelInfo(attack.a);
 			if(!levelInfo) {
-				this.Log("Not attacking: Missing level info! for coordinates ("+attack.x+","+attack.y+")");
+				this.Log("Auto Attack: greife nicht an: benötige Level Information für ("+attack.x+","+attack.y+")");
 				continue;
 			}
 			
 			if(levelInfo.type == ""){levelInfo.type = this.FindLevelFromMessages(attack);;} // If empty look in messages
-			if(levelInfo.type == ""){levelInfo.type = "City";} // If still blanck default to city
+			if(levelInfo.type == ""){levelInfo.type = "Stadt";} // If still blanck default to city
 			
-			if(levelInfo.type=='Camp') {
-				if(this.options.attackTypeCamp!=true) {
-					this.Log("Not attacking: Not attacking camps! for coordinates ("+attack.x+","+attack.y+")");
+			if(levelInfo.type=='Barbaren') {
+				if(this.options.attackTypeBarbaren!=true) {
+					this.Log("Auto Attack: Barbaren Lager werden von ("+attack.x+","+attack.y+") nicht angegriffen!");
 					continue;
 				}
 			} else if(wilderness[levelInfo.type]) {
 				if(this.options.attackTypeWild!=true) {
-					this.Log("Not attacking: Not attacking wildernesses! for coordinates ("+attack.x+","+attack.y+")");
+					this.Log("Auto Attack: Wildnisse werden von ("+attack.x+","+attack.y+") nicht angegriffen!");
 					continue;
 				}
-			} else if (levelInfo.type!='Camp' && !wilderness[levelInfo.type]) {
+			} else if (levelInfo.type!='Barbaren' && !wilderness[levelInfo.type]) {
 				var tempAttack=this.GetAttack(attack.x,attack.y);
 				if(!tempAttack){
-					this.Log("Not attacking: Invalid attack entered ("+attack.x+","+attack.y+")");
+					this.Log("Auto Attack: Ungültiger Angriff Hinzugefügt für ("+attack.x+","+attack.y+")");
 					continue;
 				}
 				if(tempAttack.type==0) {
-					if(this.options.attackTypeCity!=true) {
-						this.Log("Not attacking: Not attacking cities for coordinates ("+attack.x+","+attack.y+")");
+					if(this.options.attackTypeStadt!=true) {
+						this.Log("Auto Attack: kein Städte Angriff für ("+attack.x+","+attack.y+")");
 						continue;
 					}
 				} else if(tempAttack.type==1) {
 					if(this.options.attackTypeTransport!=true) {
-						this.Log("Not attacking: Not sending transports for coordinates ("+attack.x+","+attack.y+")");
+						this.Log("Auto Attack: Sende keine Transporte für ("+attack.x+","+attack.y+")");
 						continue;
 					}
 				}
 			} else {
-				if(levelInfo.type!='City' && levelInfo.type!='Camp') {
-					this.Log("Not attacking: Unknown attack type for coordinates ("+attack.x+","+attack.y+")");
+				if(levelInfo.type!='Stadt' && levelInfo.type!='Barbaren') {
+					this.Log("Auto Attack: Unbekannter Angriffs Typ für ("+attack.x+","+attack.y+")");
 					continue;
 				}
 			}
 
 			if(!attack.a.troops) {
 				this.Log("inspect1: "+inspect(attack.a),10);
-				this.Log("Not attacking: No troops defined for coordinates ("+attack.x+","+attack.y+")");
+				this.Log("Auto Attack: Es wurden keine Koordinaten für ("+attack.x+","+attack.y+") gefunden!");
 				continue;
 			}
 			if(attack.a.ignore) {
-				this.Log("Not attacking: Location ignored for coordinates ("+attack.x+","+attack.y+")");
+				this.Log("Auto Attack: Koordinate ("+attack.x+","+attack.y+") hast du Ignoriert!");
 				continue;
 			}
 			if(attack.dist>=this.options.attackMaxDistance) {
-				this.Log("Not attacking: Distance too far for coordinates ("+attack.x+","+attack.y+")");
+				this.Log("Auto Attack: Die Entfernung für die Koordinate ("+attack.x+","+attack.y+") ist zu weit!");
 				continue;
 			}
-			if(this.options.lockAttackFromCity) {
-				//this.Log('fromCity='+attack.a.fromCity+', currentCity='+this.GetCurrentCityId());
-				if(attack.a.fromCity!=undefined) {
-					if(currentCity!=attack.a.fromCity) { continue; }
+			if(this.options.lockAttackFromStadt) {
+				//this.Log('fromStadt='+attack.a.fromStadt+', currentStadt='+this.GetCurrentStadtId());
+				if(attack.a.fromStadt!=undefined) {
+					if(currentStadt!=attack.a.fromStadt) { continue; }
 				}
 			}
 			
@@ -3287,7 +3296,7 @@ var KOCAttack={
 					// Make sure this is the first wave of the multi-wave attack and then don't send it if there aren't enough marching slots for both waves
 					if(this.IsFirstAttackAtLocation(attack.x, attack.y)) {
 						// This is the first wave
-						this.Log("Not attacking: Not enough available marching slots at rally point to launch both suicide wave and second wave for coordinates ("+attack.x+","+attack.y+")");
+						this.Log("Auto Attack: du kannst keine Märsche mehr senden für ("+attack.x+","+attack.y+"), es ist kein Platz mehr für eine Kamikaze Welle");
 						break;
 					}
 				}
@@ -3295,17 +3304,17 @@ var KOCAttack={
 			
 			// Make sure we have at least one available slot in attack queue for normal attack
 			if(this.available_marches_num<1){
-				this.Log("Not attacking: Not enough marching slots at rally point to launch attack for coordinates ("+attack.x+","+attack.y+")");
+				this.Log("Auto Attack: du kannst keine Angriffe mehr senden für ("+attack.x+","+attack.y+")");
 				break;
 			}
 			
 			if(!this.IsEnoughTroops(currentTroops,troops_to_send)) {
-				this.Log("Not attacking: Not enough troops for coordinates ("+attack.x+","+attack.y+")");
+				this.Log("Auto Attack: zu wenig Truppen auf ("+attack.x+","+attack.y+") um einen Angriff zu senden!");
 				continue;
 			}
 			if (attack.a.type==1) {
 				if(!this.IsEnoughResources(currentResources,attack.a.resources)) {
-					this.Log("Not attacking: Not enough resources for coordinates ("+attack.x+","+attack.y+")");
+					this.Log("Auto Attack: nicht genug Ressourcen für ("+attack.x+","+attack.y+")");
 					continue;
 				}
 			}
@@ -3316,26 +3325,26 @@ var KOCAttack={
 				lastAttack=nowSecs-parseInt(attack.a.time);
 			}
 		
-			if(levelInfo.type=='' || levelInfo.type=='City' || levelInfo.type=='Transport') {
+			if(levelInfo.type=='' || levelInfo.type=='Stadt' || levelInfo.type=='Transport') {
 				if(attack.a.type==0) {
-					if(lastAttack<this.options.attackSecsSinceLastCity) {
-						this.Log("Not attacking: last attack ("+lastAttack+") < this.options.attackSecsSinceLastCity ("+this.options.attackSecsSinceLastCity+") for coordinates ("+attack.x+","+attack.y+")");
+					if(lastAttack<this.options.attackSecsSinceLastStadt) {
+						this.Log("Auto Attack: Letzter Angriff: ("+lastAttack+") < this.options.attackSecsSinceLastStadt ("+this.options.attackSecsSinceLastStadt+") für Koordinate ("+attack.x+","+attack.y+")");
 						continue;
 					}
 				} else {
 					if(lastAttack<this.options.attackSecsSinceLastTransport){
-						this.Log("Not attacking: last attack ("+lastAttack+") < this.options.attackSecsSinceLastTransport ("+this.options.attackSecsSinceLastTransport+") for coordinates ("+attack.x+","+attack.y+")");
+						this.Log("Auto Attack: Letzter Angriff: ("+lastAttack+") < this.options.attackSecsSinceLastTransport ("+this.options.attackSecsSinceLastTransport+") für Koordinate ("+attack.x+","+attack.y+")");
 						continue;
 					}
 				}
-			} else if(levelInfo.type=='Camp') {
-				if(lastAttack<this.options.attackSecsSinceLastCamp) {
-					this.Log("Not attacking: last attack ("+lastAttack+") < this.options.attackSecsSinceLastCamp ("+this.options.attackSecsSinceLastCamp+") for coordinates ("+attack.x+","+attack.y+")");
+			} else if(levelInfo.type=='Barbaren') {
+				if(lastAttack<this.options.attackSecsSinceLastBarbaren) {
+					this.Log("Auto Attack: Letzter Angriff: ("+lastAttack+") < this.options.attackSecsSinceLastBarbaren ("+this.options.attackSecsSinceLastBarbaren+") für Koordinate ("+attack.x+","+attack.y+")");
 					continue;
 				}
 			} else  {
 				if(lastAttack<this.options.attackSecsSinceLastWild) {
-					this.Log("Not attacking: last attack ("+lastAttack+") < this.options.attackSecsSinceLastWild ("+this.options.attackSecsSinceLastWild+") for coordinates ("+attack.x+","+attack.y+")");
+					this.Log("Auto Attack: Letzter Angriff: ("+lastAttack+") < this.options.attackSecsSinceLastWild ("+this.options.attackSecsSinceLastWild+") für Koordinate ("+attack.x+","+attack.y+")");
 					continue;
 				}
 			}
@@ -3355,12 +3364,12 @@ var KOCAttack={
 					suicideArmySize+=parseInt(attack.a.suicidewave[t]);
 				}
 				if(suicideArmySize<=0) {
-					this.Log('Invalid suicide wave army size (not enough!) for coordinates ('+attack.x+','+attack.y+')');
+					this.Log('Auto Attack: Ungültige Kamikaze Wellen Truppenstärke für ('+attack.x+','+attack.y+'), es sind zu wenig Truppen!');
 					continue;
 				}
 			}
 			if(armySize<=0) {
-				this.Log('Invalid suicide wave army size (not enough!) for coordinates ('+attack.x+','+attack.y+')');
+				this.Log('Auto Attack: Ungültige Kamikaze Wellen Truppenstärke für ('+attack.x+','+attack.y+'), es sind zu wenig Truppen!');
 				continue;
 			}	
 			
@@ -3379,7 +3388,7 @@ var KOCAttack={
 				}
 			}
 			
-			if((this.options.attackpriority == levelInfo.type || this.options.attackpriority == 'None') && ok && this.priorityattack){
+			if((this.options.attackpriority == levelInfo.type || this.options.attackpriority == 'Keine') && ok && this.priorityattack){
 				bestAttack=attack;
 				bestAttack.type=attack.a.type;
 				bestAttackSize=armySize;
@@ -3393,7 +3402,7 @@ var KOCAttack={
 		}
 		if(bestAttack == null && this.priorityattack){
 			this.priorityattack = false;
-			bestAttack = this.FindBiggestCampAttack(attacks,currentTroops,currentResources);
+			bestAttack = this.FindBiggestBarbarenAttack(attacks,currentTroops,currentResources);
 		} else {
 			this.priorityattack = true;
 		}
@@ -3402,7 +3411,7 @@ var KOCAttack={
 	
 	IsMapperRunning:function() {
 		if(ById('SendMap')) {
-			this.Log('mapper is running, do not auto attack');
+			this.Log('Auto Attack: mapper rennt nicht, kein Auto Attack benutzen!');
 			return true;
 		}
 		return false;
@@ -3415,7 +3424,7 @@ var KOCAttack={
 		try {
 			return JSON2.parse(aStr);
 		} catch(e) {
-			this.Log('failed to parse autoattack: '+aStr);
+			this.Log('Auto Attack: parse für autoattack fehlgeschlagen: '+aStr);
 			this.SetValue('AutoAttack','');
 			return null;
 		}
@@ -3474,8 +3483,8 @@ var KOCAttack={
 		if(!div) {
 			div=document.createElement('div');
 			var titleA=document.createElement('a');
-			titleA.innerHTML='Attacks ';
-			titleA.title='Closest attacks, more than ? hrs since last attack';
+			titleA.innerHTML='Angriffe ';
+			titleA.title='Nahen Angriffe, mehr als ? Stunden seid dem Letzten Angriff';
 			titleA.style.cursor='pointer';
 			titleA.addEventListener('click',function() {
 				div.style.display=div.style.display=='block'?'none':'block';
@@ -3487,7 +3496,7 @@ var KOCAttack={
 			var viewTypeOnlyInp=document.createElement('input');
 			viewTypeOnlyInp.style.width='10px';
 			viewTypeOnlyInp.style.fontSize="8px";
-			viewTypeOnlyInp.title="Type of target. ex: P, W, M, P1";
+			viewTypeOnlyInp.title="Typ vom Ziel! z.B.: P, W, M, P1";
 			this.hrsInput=document.createElement('input');
 			this.hrsInput.style.width='16px';
 			this.hrsInput.value=this.GetMinHours();
@@ -3513,11 +3522,11 @@ var KOCAttack={
 			bookmark.appendChild(titleA);
 			AddText(bookmark,'>');
 			bookmark.appendChild(this.hrsInput);
-			AddText(bookmark,'hrs ');
+			AddText(bookmark,'Stunden ');
 			
 			var expandA=document.createElement('a');
-			expandA.innerHTML='E';
-			expandA.title='Expand information';
+			expandA.innerHTML='Anzeigen';
+			expandA.title='Information Anzeigen';
 			expandA.addEventListener('click',function() {
 				t.expandedInfo=t.expandedInfo?false:true;
 				t.DrawClosestFarms();
@@ -3539,7 +3548,7 @@ var KOCAttack={
 		var mapCoord=this.GetCurrentMapCoord();
 		var nowSecs=new Date().getTime()/1000;
 		var attacks=this.GetClosestAttacks(mapCoord.x,mapCoord.y);
-		//var bestAttack=this.FindBiggestCampAttack(attacks,currentTroops,currentResources);
+		//var bestAttack=this.FindBiggestBarbarenAttack(attacks,currentTroops,currentResources);
 		var GoClosestFarm=function(e) {
 			var xy=e.target.parentNode.parentNode.getAttribute('xy').split(',');
 			t.DoUnsafeWindow("setBookmarkCoord("+xy[0]+","+xy[1]+");");
@@ -3547,7 +3556,7 @@ var KOCAttack={
 		var AttackClosestFarm=function(e) {
 			var xy=e.target.parentNode.parentNode.getAttribute('xy').split(',');
 			var attack=t.GetAttack(xy[0],xy[1]);
-			if(!attack) throw("Cannot find:"+xy[0]+','+xy[1]);
+			if(!attack) throw("Auto Attack: konnte nichts finden für:"+xy[0]+','+xy[1]);
 			if(attack.type==0) {
 				t.DoUnsafeWindow("modal_attack(4,"+xy[0]+","+xy[1]+");");
 			} else if(attack.type==1) {
@@ -3557,7 +3566,7 @@ var KOCAttack={
 		var IgnoreFarm=function(e) {
 			var xy=e.target.parentNode.parentNode.getAttribute('xy').split(',');
 			var attack=t.GetAttack(xy[0],xy[1]);
-			if(!attack) throw("Cannot find:"+xy[0]+','+xy[1]);
+			if(!attack) throw("Auto Attack: konnte nichts finden für:"+xy[0]+','+xy[1]);
 			attack.ignore=true;
 			t.SetAttack(xy[0],xy[1],attack);
 		};
@@ -3654,7 +3663,7 @@ var KOCAttack={
 				
 				var aDelete=document.createElement('a');
 				aDelete.innerHTML='X';
-				aDelete.title='Delete';
+				aDelete.title='Löschen';
 				aDelete.addEventListener('click',function(e) { DeleteFarm(e); },false);
 				tr.insertCell(-1).appendChild(aDelete);
 			
@@ -3733,7 +3742,7 @@ var KOCAttack={
 	},
 
 	OpenViewReports:function() {
-		this.Log('Open View Reports');
+		this.Log('Auto Attack: öffne Angriffs Berichte');
 		this.DoUnsafeWindow("modal_messages();");
 		this.DoUnsafeWindow('track_chrome_btn("messages_btn");');
 		this.DoUnsafeWindow('modal_messages_viewreports();');
@@ -3741,21 +3750,21 @@ var KOCAttack={
 
 	//autoAttackCitiesDoneMax:3,
 	autoAttackCitiesDone:0,
-	autoAttackCityUpto:1,
+	autoAttackStadtUpto:1,
 	autoAttackModalWaiting:false,
 	autoAttackTimeout:null,
-	autoAttacksThisCity:0,
+	autoAttacksThisStadt:0,
 	ClearAutoAttackTimeout:function() {
 		if(this.autoAttackTimeout!=null) {
-			this.Log('reload page timer killed');
+			this.Log('Auto Attack: Refresh seiten Timer gekillt!');
 			window.clearTimeout(this.autoAttackTimeout);
 			this.autoAttackTimeout=null;
 		}
 	},
 	RestartAutoAttack:function() {
-		this.autoAttacksThisCity=0;
+		this.autoAttacksThisStadt=0;
 		this.autoAttackCitiesDone=0;
-		this.autoAttackCityUpto=1;
+		this.autoAttackStadtUpto=1;
 		this.autoAttackModalWaiting=false;
 		this.NextAutoAttack();
 	},
@@ -3764,16 +3773,16 @@ var KOCAttack={
 		var t=this;
 		if(!secs) secs=this.options.waitAfterCitiesDone;
 		var refreshMSecs=t.GetRandTime(1000*secs);
-		this.Log('refreshing in '+(refreshMSecs/1000)+' secs, all cities done:'+this.autoAttackCityUpto);
+		this.Log('Auto Attack: refresh in '+(refreshMSecs/1000)+' Sekunden, Alle Städte sind fertig:'+this.autoAttackStadtUpto);
 		this.ClearAutoAttackTimeout();
 		this.autoAttackTimeout=window.setTimeout(function() {
 			if(t.autoAttackTimeout==null) return;
 			t.autoAttackTimeout=null;
 			if(t.IsMapperRunning() || t.IsCurrentlySendingMultipleWaves()) {
 				if(t.IsMapperRunning()){
-					t.Log("Waiting for mapping to finish");
+					t.Log("Auto Attack: warte aufs mapping!");
 				}else{
-					t.Log("Waiting for multiple wave attack to finish");
+					t.Log("Auto Attack: warte bis die multiwellen wieder da sind!");
 				}
 				// don't reload until the mapper or multi-wave attack has finished.
 				window.setTimeout(function() {
@@ -3785,13 +3794,13 @@ var KOCAttack={
 			//window.location.reload(true);
 			t.ReloadWindow();
 		},refreshMSecs);
-		this.Log('reload page timer started');
+		this.Log('Auto Attack: reload seiten timer gestartet!');
 	},
 	
 	multipleWaveTimeout:null,
 	ClearMultipleWaveTimeout:function() {
 		if(this.multipleWaveTimeout!=null) {
-			this.Log('city switching timer killed');
+			this.Log('Auto Attack: Stadt wechsel timer gekillt!');
 			window.clearTimeout(this.multipleWaveTimeout);
 			this.multipleWaveTimeout=null;
 		}
@@ -3800,22 +3809,22 @@ var KOCAttack={
 		var t=this;
 		if(!secs) secs=t.options.attackDelay;
 		var attackDelayMSecs=t.GetRandTime(1000*secs);
-		this.Log('Waiting '+(attackDelayMSecs/1000)+' secs to retry second wave attack...');
+		this.Log('Auto Attack: Warte '+(attackDelayMSecs/1000)+' Sekunden bis die 2 Angriffs Welle zurück ist!');
 		this.ClearMultipleWaveTimeout();
 		this.multipleWaveTimeout=window.setTimeout(function() {
 			if(t.multipleWaveTimeout==null) return;
 			t.multipleWaveTimeout=null;
 			if(t.IsCurrentlySendingMultipleWaves()) {
-				t.Log("Waiting for multiple wave attack to finish...");
+				t.Log("Auto Attack: warte auf Multiwellen bis sie fertig sind!");
 				// don't switch cities until the multi-wave attack has finished.
 				window.setTimeout(function() {
 					t.StartMultipleWaveTimer();
 				},0);
 				return;
 			}
-			t.NextAutoAttackCity();
+			t.NextAutoAttackStadt();
 		},attackDelayMSecs);
-		this.Log('Multiple wave attack timer started');
+		this.Log('Auto Attack: Multiwellen Angriffs Timer gestartet!');
 	},
 
 	lastOpenViewReports:0,
@@ -3838,11 +3847,11 @@ var KOCAttack={
 		}
 	},
 
-	ClickChangeCity:function(cityA,tries) {
+	ClickChangeStadt:function(cityA,tries) {
 		var t=this;
 		nHtml.Click(cityA);
 		// If this is the only city selected in the options, we just pretend to switch
-		var currentCityNum = this.autoAttackCityUpto;
+		var currentStadtNum = this.autoAttackStadtUpto;
 		var enabledCities = 0;
 		for(var i=1; i<=8; i++){
 			if(this.options.okCities[i]){
@@ -3850,31 +3859,31 @@ var KOCAttack={
 			}
 		}
 		//t.Log("Number of enabled cities to attack from: "+enabledCities);
-		if(enabledCities==1){ t.prevCurrentCity = -1; }
+		if(enabledCities==1){ t.prevCurrentStadt = -1; }
 		// Determine the number of the city and store it
-		t.SetCurrentAttackCityNum(cityA.id.replace("citysel_",""));
+		t.SetCurrentAttackStadtNum(cityA.id.replace("citysel_",""));
 		t.nextAutoAttackWanted=window.setTimeout(function() {
 			if(t.nextAutoAttackWanted!=null) {
 				if(tries>4) {
-					t.Log("Skip city, too many retries");
-					t.NextAutoAttackCity();
+					t.Log("Auto Attack: Heiligtum wird übersprungen, zu viele Versuche!");
+					t.NextAutoAttackStadt();
 					return;
 				}
-				t.Log("We clicked change city but the city did not change, trying again");
+				t.Log("Auto Attack: wir haben auf Stadt wechsel geklickt aber die städte wechseln nicht, versuch es noch mal!");
 				// Didn't change city
-				t.ClickChangeCity(cityA,tries+1);
+				t.ClickChangeStadt(cityA,tries+1);
 			}
 		},10000);
 	},
 
 
-	NextAutoAttackCity:function() {
+	NextAutoAttackStadt:function() {
 		var t=this;
 		var autoAttack=this.GetAutoAttack();
 		if(!autoAttack) return;
 	
 		if(this.IsCurrentlySendingMultipleWaves()){
-			this.Log('Cannot change city. Waiting for multiple wave attack to finish...');
+			this.Log('Auto Attack: kann das Heiligtum nicht wechseln! Warte auf die Multiwellen bis sie fertig sind!');
 			t.ClearMultipleWaveTimeout();
 			t.StartMultipleWaveTimer();
 			return;
@@ -3883,98 +3892,98 @@ var KOCAttack={
 		}
 	
 		// change to next city
-		this.autoAttacksThisCity=0;
+		this.autoAttacksThisStadt=0;
 
 		var cityA=null;
 
-		// this.autoAttackCityUpto++;
-		// cityA=ById('citysel_'+this.autoAttackCityUpto);
+		// this.autoAttackStadtUpto++;
+		// cityA=ById('citysel_'+this.autoAttackStadtUpto);
 		
 		// //~~~ problem here when under attack, the city isn't marked as selected?
 		// // Skip to next city along the line if the current city is already selected somehow
 		// if(cityA && cityA.className && cityA.className.indexOf('city_selected')>=0) {
-			// this.Log('Skip city, current city:'+this.autoAttackCityUpto);
-			// this.autoAttackCityUpto++;
+			// this.Log('Skip city, current city:'+this.autoAttackStadtUpto);
+			// this.autoAttackStadtUpto++;
 		// }
 
 		// // Determine the next enabled city in the options
-		// var firstAvailableCityNum = this.autoAttackCityUpto;
-		// while(firstAvailableCityNum<=8){
-			// if(this.options.okCities[firstAvailableCityNum]){
+		// var firstAvailableStadtNum = this.autoAttackStadtUpto;
+		// while(firstAvailableStadtNum<=8){
+			// if(this.options.okCities[firstAvailableStadtNum]){
 				// break;
 			// }else{
-				// firstAvailableCityNum++;
+				// firstAvailableStadtNum++;
 			// }
 		// }
 		// // Default to city #1 if no cities are enabled
-		// if(!this.options.okCities[firstAvailableCityNum]){
-			// firstAvailableCityNum = 1;
+		// if(!this.options.okCities[firstAvailableStadtNum]){
+			// firstAvailableStadtNum = 1;
 		// }
 		
 		// // Check to make sure that the next city is selected in the options
-		// //this.Log("Currently attempting to switch to city: "+this.autoAttackCityUpto);
-		// var currentCityNum = this.autoAttackCityUpto;
-		// while(currentCityNum<=8){
-			// //this.Log("Is City "+currentCityNum+" Selected in options: "+this.options.okCities[currentCityNum]);
-			// if(!this.options.okCities[currentCityNum]){
-				// currentCityNum++;
+		// //this.Log("Currently attempting to switch to city: "+this.autoAttackStadtUpto);
+		// var currentStadtNum = this.autoAttackStadtUpto;
+		// while(currentStadtNum<=8){
+			// //this.Log("Is Stadt "+currentStadtNum+" Selected in options: "+this.options.okCities[currentStadtNum]);
+			// if(!this.options.okCities[currentStadtNum]){
+				// currentStadtNum++;
 			// }else{
-				// if(currentCityNum>this.autoAttackCityUpto){
-					// this.Log("City "+this.autoAttackCityUpto+" not enabled in options.");
-					// this.autoAttackCityUpto = currentCityNum;
+				// if(currentStadtNum>this.autoAttackStadtUpto){
+					// this.Log("Stadt "+this.autoAttackStadtUpto+" not enabled in options.");
+					// this.autoAttackStadtUpto = currentStadtNum;
 				// }
-				// //this.Log("Attempting to switch to city: "+this.autoAttackCityUpto);
+				// //this.Log("Attempting to switch to city: "+this.autoAttackStadtUpto);
 				// break;
 			// }
 			// // No cities were available. Switching to first available city
-			// this.autoAttackCityUpto = firstAvailableCityNum;
+			// this.autoAttackStadtUpto = firstAvailableStadtNum;
 		// }
 
 		while(true) {
-			this.autoAttackCityUpto++;
-			cityA=ById('citysel_'+this.autoAttackCityUpto);
+			this.autoAttackStadtUpto++;
+			cityA=ById('citysel_'+this.autoAttackStadtUpto);
 			//~~~ problem here when under attack, the city isn't marked as selected?
-			if((cityA && cityA.className && cityA.className.indexOf('city_selected')>=0) || (!this.options.okCities[this.autoAttackCityUpto])) {
-				this.Log('Skip city, current city or city not selected: '+this.autoAttackCityUpto);
+			if((cityA && cityA.className && cityA.className.indexOf('city_selected')>=0) || (!this.options.okCities[this.autoAttackStadtUpto])) {
+				this.Log('Auto Attack: Heiligtum übersprungen,  aktuelle Stadt wurde nicht ausgewählt: '+this.autoAttackStadtUpto);
 			} else {
-				this.Log('Attempting to select this city: '+this.autoAttackCityUpto);
-				cityA=ById('citysel_'+this.autoAttackCityUpto);
+				this.Log('Auto Attack: versuche die Stadt auszuwählen: '+this.autoAttackStadtUpto);
+				cityA=ById('citysel_'+this.autoAttackStadtUpto);
 				break;
 			}
 		}
 	
-		cityA=ById('citysel_'+this.autoAttackCityUpto);
+		cityA=ById('citysel_'+this.autoAttackStadtUpto);
 		if(!cityA) {
 			// go back to the 1st available city
-			this.Log('Start from 1st city again');
-			if(this.autoAttackCityUpto<=2) {
+			this.Log('Auto Attack: Starte von deinem ersten Heiligtum!');
+			if(this.autoAttackStadtUpto<=2) {
 				// only one city.
 			} else {
-				this.autoAttackCityUpto=1;
-				cityA=ById('citysel_'+this.autoAttackCityUpto);
+				this.autoAttackStadtUpto=1;
+				cityA=ById('citysel_'+this.autoAttackStadtUpto);
 			}
 			this.autoAttackCitiesDone++;
 		}
 
 		if(!cityA || this.autoAttackCitiesDone>=this.options.autoAttackCitiesDoneMax) {
 			//Reset to first city if auto attack does the refresh
-			this.SetCurrentAttackCityNum(1);
+			this.SetCurrentAttackStadtNum(1);
 			// ran out of cities, let's refresh in a minute
 			this.StartReloadPageTimer();
 			return;
 		} else {
 			if(this.nextAutoAttackTimeout==null) {
-				var secs=t.GetRandTime(1000*t.options.changeCitySecs);
-				this.Log('Changing city to: '+this.autoAttackCityUpto+', in '+(secs/1000)+'secs, loop: '+this.autoAttackCitiesDone);
+				var secs=t.GetRandTime(1000*t.options.changeStadtSecs);
+				this.Log('Changing city to: '+this.autoAttackStadtUpto+', in '+(secs/1000)+'secs, loop: '+this.autoAttackCitiesDone);
 				this.nextAutoAttackTimeout=setTimeout(function() {
 					t.nextAutoAttackTimeout=null;
 					t.SetValuesCache();
-					t.ClickChangeCity(cityA,0);
+					t.ClickChangeStadt(cityA,0);
 				},secs);
 			} else {
-				this.Log('Cannot change city. Reason: about to attack or change city');
+				this.Log('Auto Attack: wechsel Heiligtum! Grund: bin dabei ein Angriff zu starten oder Heiligtum zu wechseln!');
 			}
-	//		this.autoAttackCityUpto++;
+	//		this.autoAttackStadtUpto++;
 		}
 	},
 
@@ -4003,7 +4012,7 @@ var KOCAttack={
 			}
 			//window.location.reload(true);
 			t.ResetIdStatus();
-			t.Log("Attack box has not appeared, let's reopen");
+			t.Log("Auto Attack: Angriffs Box  box ist nicht erschienen, es wird ein reOpen versucht!");
 			window.setTimeout(function() {
 				t.OpenAttackDialog(bestAttack);
 			},0);
@@ -4021,7 +4030,7 @@ var KOCAttack={
 							maxi=i;
 						}
 					}
-					t.Log('Closing: '+maxi);
+					t.Log('Auto Attack: Schließe: '+maxi);
 					unsafeWindow.Modal.modalid=maxi;
 					if(maxi>0) {
 						unsafeWindow.Modal.hideCurtain();
@@ -4050,7 +4059,7 @@ var KOCAttack={
 
 	nextAutoAttackWanted:null,
 	NextAutoAttack:function() {
-		this.Log("Next auto attack");
+		this.Log("Auto Attack: nächster automatischer Angriff");
 		if(this.nextAutoAttackWanted!=null) {
 			window.clearTimeout(this.nextAutoAttackWanted);
 			this.nextAutoAttackWanted=null;
@@ -4058,9 +4067,9 @@ var KOCAttack={
 
 		var autoAttack=this.GetAutoAttack();
 
-		if(!this.options.okCities[this.autoAttackCityUpto]) {
-			this.Log('Skip city. Not enabled in options. City: '+this.autoAttackCityUpto);
-			this.NextAutoAttackCity();
+		if(!this.options.okCities[this.autoAttackStadtUpto]) {
+			this.Log('Auto Attack: Heiligtum übersprungen,  aktuelle Stadt wurde nicht ausgewählt: '+this.autoAttackStadtUpto);
+			this.NextAutoAttackStadt();
 			return;
 		}
 		
@@ -4078,7 +4087,7 @@ var KOCAttack={
 		var mapCoord=this.GetCurrentMapCoord();
 		var attacks=this.GetClosestAttacks(mapCoord.x,mapCoord.y);
 		//this.Log("Current attacks in system: "+inspect(attacks,10));
-		var bestAttack=this.FindBiggestCampAttack(attacks,currentTroops,currentResources);
+		var bestAttack=this.FindBiggestBarbarenAttack(attacks,currentTroops,currentResources);
 		if(bestAttack && this.available_marches_num>0) {
 			// attack closest biggest barbarian/wilderness
 			autoAttack.x=bestAttack.x;
@@ -4093,7 +4102,7 @@ var KOCAttack={
 				waitedCount++;
 				//t.Log('waiting'+waitedCount);
 				if(waitedCount>20) {
-					t.Log('Force close the attack dialog');
+					t.Log('Auto Attack: Zwinge den Angriffs Dialog zu schließen');
 					t.DoUnsafeWindow('Modal.hideModalAll();');
 				}
 				var attackBox=document.getElementById('modal_attack');
@@ -4119,8 +4128,8 @@ var KOCAttack={
 			autoAttack.x=autoAttack.y=-1;
 			this.SetAutoAttack(autoAttack);
 			// no valid attacks for this city.
-			this.Log("No valid targets, need to attack more targets or wait for troops to return.");
-			this.NextAutoAttackCity();
+			this.Log("Auto Attack: Keine gültigen Ziele, benötige mehr Ziele oder warte bis die Truppen zurück sind!");
+			this.NextAutoAttackStadt();
 		}
 	},
 
@@ -4339,7 +4348,7 @@ var KOCAttack={
 		},false);
 		a.className='buttonDown20';
 		//a.style.paddingLeft='30px';
-		a.innerHTML='<span>Delete Wild/Barb/Transp</span>';
+		a.innerHTML='<span>Lösche Wild/Barb/Transp</span>';
 		if(msgBody.nextSibling) {
 			msgBody.nextSibling.insertBefore(a,msgBody.nextSibling.childNodes[0]);
 			//msgBody.nextSibling.appendChild(a);
@@ -4354,7 +4363,7 @@ var KOCAttack={
 		},false);
 		a.className='buttonDown20';
 		//a.style.paddingLeft='30px';
-		a.innerHTML='<span>Delete Farm</span>';
+		a.innerHTML='<span>Farm Löschen</span>';
 		if(msgBody.nextSibling) {
 			msgBody.nextSibling.insertBefore(a,msgBody.nextSibling.childNodes[0]);
 			//msgBody.nextSibling.appendChild(a);
@@ -4417,7 +4426,7 @@ var KOCAttack={
 		this.prevClearMessages=nowSecs;
 		
 		var keepReports=this.isChrome?this.options.chromeKeepReports:this.options.keepReports;
-		this.Log('Clear old messages, keeping '+keepReports);
+		this.Log('Auto Attack: Leere alte Nachrichten, behalte '+keepReports);
 		if(keepReports<=0) { 
 			// must keep at least 1 report to get level information.
 			keepReports=1; 
@@ -4466,11 +4475,11 @@ var KOCAttack={
 		a.className='button25';
 		var setTrainTroopsA=function() {
 			var trainTroops=JSON2.parse(t.GetValue('TrainTroops','{}'));
-			a.innerHTML='<span>'+(trainTroops[t.GetCurrentCityId()]==type?'Auto Train - On':'Auto Train - Off')+'</span>';
+			a.innerHTML='<span>'+(trainTroops[t.GetCurrentStadtId()]==type?'Auto Ausbildung - AN':'Auto Ausbildung -  AUS')+'</span>';
 		}
 		a.addEventListener('click',function() {
 			var trainTroops=JSON2.parse(t.GetValue('TrainTroops','{}'));
-			trainTroops[t.GetCurrentCityId()]=trainTroops[t.GetCurrentCityId()]==type?undefined:type;
+			trainTroops[t.GetCurrentStadtId()]=trainTroops[t.GetCurrentStadtId()]==type?undefined:type;
 			t.SetValue('TrainTroops',JSON2.stringify(trainTroops));
 			setTrainTroopsA();
 		},false);
@@ -4481,31 +4490,31 @@ var KOCAttack={
 		pnode.appendChild(a);
 	},
 
-	GetCurrentCityId:function() {
+	GetCurrentStadtId:function() {
 		if(!unsafeWindow.currentcityid) return null;
 		return unsafeWindow.currentcityid;
 	},
 	
-	GetCurrentAttackCityNum:function() {
-		var curCityNum=this.GetValue('CurrentAttackCityNum',null);
-		if(!curCityNum || !is_int(curCityNum) || curCityNum>8){
+	GetCurrentAttackStadtNum:function() {
+		var curStadtNum=this.GetValue('CurrentAttackStadtNum',null);
+		if(!curStadtNum || !is_int(curStadtNum) || curStadtNum>8){
 			// default to first city
-			curCityNum=1;
+			curStadtNum=1;
 		}
-		return curCityNum;
+		return curStadtNum;
 	},
-	SetCurrentAttackCityNum:function(curCityNum) {
-		if(!curCityNum){
-			var curCityNum = 1;
+	SetCurrentAttackStadtNum:function(curStadtNum) {
+		if(!curStadtNum){
+			var curStadtNum = 1;
 		}
-		//this.Log("Setting current attack city to: "+curCityNum);
-		this.SetValue('CurrentAttackCityNum',curCityNum);
-		return curCityNum;
+		//this.Log("Setting current attack city to: "+curStadtNum);
+		this.SetValue('CurrentAttackStadtNum',curStadtNum);
+		return curStadtNum;
 	},
 
 	
 	// returns {count, maxlevel}
-	getCityBuilding: function(cityId, buildingId){
+	getStadtBuilding: function(cityId, buildingId){
 	  var b = unsafeWindow.seed.buildings['city'+cityId];
 	  var ret = {count:0, maxLevel:0};
 	  for (var i=1; i<33; i++){
@@ -4522,7 +4531,7 @@ var KOCAttack={
 	CheckTrainTroops:function() {
 		var t=this;
 		if(!this.GetSeed()) return;
-		var cityid=this.GetCurrentCityId();
+		var cityid=this.GetCurrentStadtId();
 
 		var trainTroops=JSON2.parse(this.GetValue('TrainTroops','{}'));
 		//var trainTroops=GM_getValue('TrainTroops_'+this.GetServerId(),0);
@@ -4541,7 +4550,7 @@ var KOCAttack={
 		// Determine number of available training slots
 		var availableTrainingSlots = 0;
 		try{
-			var barracksTotal = this.getCityBuilding(cityid, 13).count;
+			var barracksTotal = this.getStadtBuilding(cityid, 13).count;
 			var trainingSlotsUsed = unsafeWindow.seed.queue_unt['city'+cityid].length;
 			if(trainingSlotsUsed!=null){
 				var availableTrainingSlots = barracksTotal-trainingSlotsUsed;
@@ -4579,7 +4588,7 @@ var KOCAttack={
 				var t=this;
 				window.setTimeout(function() {
 					if(numInp.value>parseInt(maxObj.textContent)) {
-						t.Log('Not training troops:'+numInp.value+'>'+maxObj.textContent);
+						t.Log('Auto Attack: bilde keine Truppen aus:'+numInp.value+'>'+maxObj.textContent);
 						return;
 					}
 	//var n=unsafeWindow.modal_barracks_train_max(6);
@@ -4743,7 +4752,7 @@ var KOCAttack={
 			}
 			return true;
 		});
-		window.alert("All stored attacks for this domain have been deleted.\nClick the ok button to reload.");
+		window.alert("Alle gespeicherten Angriffe wurden erfolgreich gelöscht!\nKlick OK um KoC neu zu laden!");
 	},
 	
 	DeleteTransports:function() {
@@ -4762,7 +4771,7 @@ var KOCAttack={
 			}
 			return true;
 		});
-		window.alert("All stored transports for this domain have been deleted.\nClick the ok button to reload.");
+		window.alert("Alle gespeicherten Transporte wurden erfolgreich gelöscht!.\nKlick OK um KoC neu zu laden!");
 	},
 	ListTransports:function() {
 		var t=this;
@@ -4780,7 +4789,7 @@ var KOCAttack={
 			}
 		});
 		if (!fTransport){
-			WinLog.write ("No Transports Found\n");
+			WinLog.write ("Auto Attack: keine Transporte gefunden!\n");
 			return true;
 		}				
 	},
@@ -4843,20 +4852,20 @@ var KOCAttack={
 
 	SetupMenu:function() {
 		var t=this;
-		GM_registerMenuCommand('KOCAttack - Options',function() {
+		GM_registerMenuCommand('KoC Attack - Einstellung',function() {
 			t.ShowOptionsDialog();
 		});
-		GM_registerMenuCommand('KOCAttack - View Attacks',function() {
+		GM_registerMenuCommand('KoC Attack - Angriffe',function() {
 			t.ShowViewAttacksDialog();
 		});
-		GM_registerMenuCommand('KOCAttack - Import/Export',function() {
+		GM_registerMenuCommand('KoC Attack - Import/Export',function() {
 			t.ShowImportExportBox();
 		});
 		
-		GM_registerMenuCommand('KOCAttack - Auto Attack',function() {
+		GM_registerMenuCommand('KoC Attack - Angriff!',function() {
 			t.ToggleAutoAttack();
 		});
-		GM_registerMenuCommand('KOCAttack - Factory Reset!',function() {
+		GM_registerMenuCommand('KoC Attack - Zurücksetzen',function() {
 			t.FactoryReset();
 		});
 	},
@@ -4873,8 +4882,8 @@ var KOCAttack={
 	*/
 
 	pageLoaded:false,
-	prevCurrentCity:-1,
-	currentAttackCityResumed:false,
+	prevCurrentStadt:-1,
+	currentAttackStadtResumed:false,
 	inviteFriendsTabHidden:false,
 	idStatus:{},
 	ResetIdStatus:function() {
@@ -4898,7 +4907,7 @@ var KOCAttack={
 					
 			window.setTimeout(function() {
 				if(!t.pageLoaded && t.GetAutoAttack() && !t.IsMapperRunning()) {
-					GM_log("whoops, game not loaded after 60 secs problem. reloading.");
+					GM_log("Auto Attack: whoops, spiel ist nicht Aktiv nach 60 Sekunden wird es neu geladen!");
 					t.SetValuesCache();
 					t.ReloadWindow();
 				}
@@ -4927,6 +4936,7 @@ var KOCAttack={
 		
 		} // End of code strictly for page: koc_game
 		
+
 		var domTickTimer=null;
 		var domTickUpto=0;
 		var domTick=function(e) {
@@ -4950,24 +4960,24 @@ var KOCAttack={
 			
 				//if(e.target.className && !/(chat|city|slot)/.exec(e.target.className)) GM_log('xxx:'+e.target.className);
 				//if(e.target.id && e.target.id!='tooltip' && e.target.id('_l_')<0 && e.target.id.substring(0,2)!='l_' && e.target.id.substring(0,8)!='citysel_') GM_log('id:'+e.target.id);
-				var cityId=t.GetCurrentCityId();
-				var cityChanged=cityId!=t.prevCurrentCity?true:false;
+				var cityId=t.GetCurrentStadtId();
+				var cityChanged=cityId!=t.prevCurrentStadt?true:false;
 				if(cityChanged) {
-					t.prevCurrentCity=cityId;
+					t.prevCurrentStadt=cityId;
 				}
 
 				// Resume attacks at the last city we left off on (if page was reloaded)
-				if(!t.currentAttackCityResumed){
-					var currentAttackCityNum = t.GetCurrentAttackCityNum();
-					var currentAttackCity=ById('citysel_'+currentAttackCityNum);
-					//t.Log('Last known attack city from :'+currentAttackCityNum);
-					if(currentAttackCity){
-						if(currentAttackCityNum>1){ //Do not change city if the last city saved was 1
-							t.Log('Changing to last city before refresh:'+currentAttackCityNum);
-							t.autoAttackCityUpto = currentAttackCityNum;
-							t.ClickChangeCity(currentAttackCity,0);
+				if(!t.currentAttackStadtResumed){
+					var currentAttackStadtNum = t.GetCurrentAttackStadtNum();
+					var currentAttackStadt=ById('citysel_'+currentAttackStadtNum);
+					//t.Log('Last known attack city from :'+currentAttackStadtNum);
+					if(currentAttackStadt){
+						if(currentAttackStadtNum>1){ //Do not change city if the last city saved was 1
+							t.Log('Auto Attack: Wechsel zum ersten Heiligtum vor den Refrehs:'+currentAttackStadtNum);
+							t.autoAttackStadtUpto = currentAttackStadtNum;
+							t.ClickChangeStadt(currentAttackStadt,0);
 						}
-						t.currentAttackCityResumed = true;
+						t.currentAttackStadtResumed = true;
 					}
 				}
 				
@@ -5239,14 +5249,13 @@ function SetupQuickMarchButton(useRetryMarch) {
 		[['v += parseInt','var f = parseInt']],
 		[['"Count"]);','"Count"]); if(f>0) { var uname=unitcost["unt"+r][0]; v+=uname[0]+uname[uname.length-1]+":"+f+", "; } ']],
 	];
-	var attack_generatequeueReplacesW=[
+		var attack_generatequeueReplacesW=[
 		[['var w = 0;','var w = "K:"+seed.knights["city" + currentcityid]["knt" + A].combat+", "; ']],
 		[['w += parseInt','var t = parseInt']],
 		[['w += parseInt','var t = parseInt']],
 		[['"Return"])','"Return"]); if(t>0) { var uname=unitcost["unt"+s][0]; w+=uname[0]+uname[uname.length-1]+":"+t+", "; } ']],
 		[['"Count"])','"Count"]); if(t>0) { var uname=unitcost["unt"+s][0]; w+=uname[0]+uname[uname.length-1]+":"+t+", "; } ']],
-	];
-		
+		];
 /*****	
 	if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1) {
 		modalAttackReplaces.push([['new Ajax',"var marchSuccess=null; "+retryMarch+
@@ -5331,9 +5340,9 @@ function SetupQuickMarchButton(useRetryMarch) {
 	var arr=[];
 	AddArray(arr,attack_generatequeueReplaces);
 	var funcStr=window['attack_generatequeue'].toString();
-	if(funcStr.indexOf(' var w = 0;')>=0) {
-		// camelotmain-218
-		AddArray(arr,attack_generatequeueReplacesW);
+if(funcStr.indexOf(' var w = 0;')>=0) {
+	// camelotmain-218
+	AddArray(arr,attack_generatequeueReplacesW);
 	} else if(funcStr.indexOf('; var r = 0;')>=0) {
 		AddArray(arr,attack_generatequeueReplacesR);
 	} else if(funcStr.indexOf('; var s = 0;')>=0) {
@@ -5344,8 +5353,8 @@ function SetupQuickMarchButton(useRetryMarch) {
 	} else if(funcStr.indexOf('; var v = 0;')>=0) {
 		// camelotmain-165
 		AddArray(arr,attack_generatequeueReplacesV);
-	} else if(funcStr.indexOf('; var u = 0;')>=0) {
-		AddArray(arr,attack_generatequeueReplacesU);
+		} else if(funcStr.indexOf('; var u = 0;')>=0) {
+			AddArray(arr,attack_generatequeueReplacesU);
 	} else {
 		var err="Unknown attack queue func: "+location.href+"\n"+funcStr;
 		GM_log(err);
@@ -5403,7 +5412,7 @@ function CreateMsgDiv() {
 			m.style.display='none';
 			m.removeChild(ml);
 		},false);
-		close.innerHTML='Close';
+		close.innerHTML='Schließen';
 		close.style.fontSize='20px';
 		
 		var center=document.createElement('center'); 
@@ -5466,17 +5475,16 @@ function DisableMixpanel() {
 
 /******************* Check strange majic error ******************/
 function checkWhiteScreen (){
-  window.setTimeout(function(){
+	 window.setTimeout(function(){
 	GM_log("Check iFrame");
 	var checknumber = 0;
 	function checkiFrame() {
 		var iFrame = null;
-		var e = null;
 		try{
-		  e = document.getElementById('app_content_130402594779').firstChild.firstChild;
-		} catch (error){
-			return;
-		}
+		 e = document.getElementById('app_content_130402594779').firstChild.firstChild;
+				} catch (error){
+					return;
+					}
 		if(e){
 			for (var c=0; c<e.childNodes.length; c++){
 				if (e.childNodes[c].tagName=='DIV' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
@@ -5500,18 +5508,18 @@ function checkWhiteScreen (){
 		  return;
 		} else if (checknumber>=10){
 			KOCAttack.ReloadWindow();
-			GM_log("White screen error. Refreshing.....");
+			GM_log("White screen fehler. Refresh.....");
 		}
 		return;
 	}
 	checkiFrame();
-  }, 10000);
+	}, 10000);
 }
 function checkStrangeMagic (){
 	GM_log("Check strange majic");
 	if (!document.getElementById("kochead")){
 		window.setTimeout ( function() { GM_log ("checkStrangeMajik REloading..."); KOCAttack.ReloadWindow(); }, 5000);
-		popup (100,100,500,275, "<BR><CENTER>checkStrangeMajik <BR><BR>KofC NOT FOUND<BR>Refreshing in 5 seconds ...<BR><BR>");
+		popup (100,100,500,275, "<BR><CENTER>checkStrangeMajik <BR><BR>KoC wurde nicht gefunden!<BR>Refresh in 5 Sekunden...<BR><BR>");
 	}  
 }
 
@@ -5564,7 +5572,7 @@ function StartAll() {
 	}
 	if(mixpanelRemoved || startAllTimeout<now) {
 		if(startAllTimeout<now) {
-			GM_log("Did not remove mixpanel, starting anyways");
+			GM_log("Auto Attack: Entferne nicht das mixpanel, es startet soweiso!");
 		}
 		KOCAttack.SetupClearMessages();
 
