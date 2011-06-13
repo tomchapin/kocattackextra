@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.6.3
+// @version          0.9.6.4
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.3';
+var KOCAversion = '0.9.6.4';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -583,8 +583,8 @@ var KOCAttack={
 			  }
 			}
 			window.alert(deletes+' of coords deleted');
-			var listBtn=ById('KOCAttackViewAttacksList');
-			nHtml.Click(listBtn);
+			// var listBtn=ById('KOCAttackViewAttacksList');
+			// nHtml.Click(listBtn);
 		  },false);
 		  
 		  for (var i=1; i<count; i++){
@@ -674,8 +674,8 @@ var KOCAttack={
 	ReloadWindow:function() {
 		var m=/^[a-zA-Z]+([0-9]+)\./.exec(document.location.hostname);
 		if (!m){
-			window.location.reload(true);
-			//history.go(0);
+			//window.location.reload(true);
+			history.go(0);
 			return;
 		}
 		var goto = 'http://apps.facebook.com/kingdomsofcamelot/?s='+m[1];
@@ -5322,7 +5322,7 @@ function SetupQuickMarchButton(useRetryMarch) {
 		]);
 	//}		
 	replaceFunc('modal_attack_do',modalAttackReplaces);
-	replaceFunc('modal_attack_update_num_max',modal_attack_update_num_maxReplaces);
+	//replaceFunc('modal_attack_update_num_max',modal_attack_update_num_maxReplaces);
 	
 	function AddArray(to,from) {
 		for(var c=0; c<from.length; c++) { to.push(from[c]); }
@@ -5470,30 +5470,7 @@ function checkWhiteScreen (){
 	GM_log("Check iFrame");
 	var checknumber = 0;
 	function checkiFrame() {
-		var iFrame = null;
-		var e = null;
-		try{
-		  e = document.getElementById('app_content_130402594779').firstChild.firstChild;
-		} catch (error){
-			return;
-		}
-		if(e){
-			for (var c=0; c<e.childNodes.length; c++){
-				if (e.childNodes[c].tagName=='DIV' && e.childNodes[c].firstChild.className == 'canvas_iframe_util'){
-					iFrame = e.childNodes[c].firstChild; 
-					break;
-				}
-			}
-		}
-		if (!iFrame){
-		  var iframes = document.getElementsByTagName('iframe');
-		  for (var i=0; i<iframes.length; i++){
-			if (iframes[i].className=='canvas_iframe_util'){
-			  iFrame = iframes[i];
-			  break; 
-			}
-		  }
-		}
+		var iFrame = document.getElementById('iframe_canvas');
 		if (!iFrame && checknumber<10){
 		  checknumber++;
 		  setTimeout (checkiFrame, 1000);
@@ -5541,23 +5518,20 @@ function popup (left, top, width, height, content){
 
 /******************* Function calls ******************/
 KOCAttack.Listen();
-checkWhiteScreen();
-DisableMixpanel();
 if(unsafeWindow.cm){
 	unsafeWindow.cm.cheatDetector={
 		a:function(){  },
 		detect:function() { }
 	};
 }
-if(location.href.indexOf('apps.facebook.com/kingdomsofcamelot/')>=0) {
-	window.setTimeout(function() {
-		
-	},10000);
+if(document.URL.search('apps.facebook.com/kingdomsofcamelot/')>=0) {
+	checkWhiteScreen();
 } else {
 	StartAll();
 }
 var startAllTimeout=null;
 function StartAll() {
+	DisableMixpanel();
 	var now=new Date().getTime();
 	if(startAllTimeout==null) {
 		startAllTimeout=now+5000;
