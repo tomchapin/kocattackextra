@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.6.4
+// @version          0.9.6.5
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.4';
+var KOCAversion = '0.9.6.5';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -2210,7 +2210,7 @@ var KOCAttack={
 					var channel_input = nHtml.FindByXPath(FBInputForm,".//input[contains(@name,'channel')]");
 					if(channel_input){
 						var current_channel_url = channel_input.value;
-						if (current_channel_url.match(/http:\/\/.{0,100}kingdomsofcamelot\.com\/.{0,100}\/cross\.htm/i)) {
+						if (current_channel_url.match(/http:\/\/.{0,100}kingdomsofcamelot\.com\/.*?\/cross_iframe\.htm/i)) {
 							var publish_button = nHtml.FindByXPath(FBInputForm,".//input[@type='submit' and contains(@name,'publish')]");
 							var privacy_setting = nHtml.FindByXPath(FBInputForm,".//input[@type='hidden' and contains(@name, 'privacy_data') and contains(@name, 'value')]");
 							if(publish_button && privacy_setting){
@@ -3279,7 +3279,7 @@ var KOCAttack={
 			//}
 			
 			// Make sure we have more than two available slots in attack queue if this is a suicide wave (unless there are only two slots even allowed)
-			this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum;
+			this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum - 2;
 			//this.Log("Available marches: "+available_marches_num);
 			if(attack.a.suicidewave && attack.a.currenttattackwavetype != "normal"){
 				//this.Log("Current attack wave type: "+attack.a.currenttattackwavetype);
@@ -4072,7 +4072,7 @@ var KOCAttack={
 		}
 		this.DetermineCurrentRallyPointLevel();
 		this.DetermineCurrentMarchesNum();
-		this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum;
+		this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum - 2;
 		var currentTroops=this.GetArmySize();
 		var currentResources=this.GetResourcesSize();
 		var mapCoord=this.GetCurrentMapCoord();
