@@ -3279,7 +3279,7 @@ var KOCAttack={
 			//}
 			
 			// Make sure we have more than two available slots in attack queue if this is a suicide wave (unless there are only two slots even allowed)
-			this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum - 2;
+			this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum;
 			//this.Log("Available marches: "+available_marches_num);
 			if(attack.a.suicidewave && attack.a.currenttattackwavetype != "normal"){
 				//this.Log("Current attack wave type: "+attack.a.currenttattackwavetype);
@@ -4072,7 +4072,7 @@ var KOCAttack={
 		}
 		this.DetermineCurrentRallyPointLevel();
 		this.DetermineCurrentMarchesNum();
-		this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum - 2;
+		this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum;
 		var currentTroops=this.GetArmySize();
 		var currentResources=this.GetResourcesSize();
 		var mapCoord=this.GetCurrentMapCoord();
