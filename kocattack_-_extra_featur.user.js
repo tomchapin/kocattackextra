@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.6.7
+// @version          0.9.6.8
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.7';
+var KOCAversion = '0.9.6.8';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -678,7 +678,7 @@ var KOCAttack={
 			history.go(0);
 			return;
 		}
-		var goto = 'http://apps.facebook.com/kingdomsofcamelot/?s='+m[1];
+		var goto = window.location.protocol+'//apps.facebook.com/kingdomsofcamelot/?s='+m[1];
 		var t = '<FORM target="_top" action="'+ goto +'" method=post><INPUT id=xxButReload type=submit value=RELOAD><input type=hidden name=s value="'+ m[1] +'"</form>';
 		var e = document.createElement ('div');
 		e.innerHTML = t;
