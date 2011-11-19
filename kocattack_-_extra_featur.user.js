@@ -738,6 +738,7 @@ var KOCAttack={
 			" If transporting, try to keep at least <input id='KOCAttackTransportReserveAmount' value='"+this.options.transportResourcesReserveAmount+"' size='10' /> of each resource in each city <font color=#FF0000>(NEW)</font>"+
 			"</div>"+
 			"<input id='KOCAttackRandom' value='"+this.options.randomPercent+"' size='3' />% random adjustment for all delays (to look more human).<br />"+
+			"<input id='KOCAttackRally' value='"+this.options.rallyKeep+"' size='3' /> of rally point slots to keep<br />"+
 			"<br />"+
 			"<input id='KOCAttackMaxDistance' value='"+(this.options.attackMaxDistance)+"' size='3' /> max distance away from city to attack/transport.<br />"+
 			"<input id='KOCAttackLockAttackFromCity' type='checkbox' "+(this.options.lockAttackFromCity?'checked':'')+" /> Only launch attacks from city they were first launched from.<br />"+
@@ -766,6 +767,7 @@ var KOCAttack={
 			"</td></tr>"+
 			
 			"<tr><td valign='top' align='center'><img src='img/gems.png' /></td><td valign='top'>"+
+			"<input id='KOCAttackDisableMapDraw' type='checkbox' "+(this.options.disableDrawMapIcons?'checked':'')+" /> Disable drawing of map icons.<br />"+
 			"<input id='KOCAttackDisableInviteFriends' type='checkbox' "+(this.options.disableInviteFriends?'checked':'')+" /> Disable the annoying \"Invite Friends\" popup dialog in-game.<br />"+
 			"<input id='KOCAttackAutoHelpAlliance' type='checkbox' "+(this.options.autoHelpAlliance?'checked':'')+" /> Automatically help alliance members with building/researching.<br />"+
 			"<input id='KOCAttackHideAllianceHelpRequests' type='checkbox' "+(this.options.hideAllianceHelpRequests?'checked':'')+" /> Hide alliance help requests/reports in chat (if above is checked, then after helping).<br />"+
@@ -882,6 +884,7 @@ var KOCAttack={
 			
 			var prev_disableInviteFriends = t.options.disableInviteFriends;
 			t.options.disableInviteFriends=ById('KOCAttackDisableInviteFriends').checked;
+			t.options.disableDrawMapIcons=ById('KOCAttackDisableMapDraw').checked;
 			if(prev_disableInviteFriends != t.options.disableInviteFriends){
 				alert("You changed the option for disabling/enabling the \"Invite Friends\" feature.\nPlease note: You will need to refresh the entire game window for the new setting to take effect!");
 			}
@@ -902,6 +905,7 @@ var KOCAttack={
 			t.options.transportResourcesReserveAmount=parseInt(ById('KOCAttackTransportReserveAmount').value);
 			
 			t.options.randomPercent=parseFloat(ById('KOCAttackRandom').value);
+			t.options.rallyKeep=parseInt(ById('KOCAttackRally').value);
 			t.options.attackMaxDistance=parseFloat(ById('KOCAttackMaxDistance').value);
 			t.options.autoAttackCitiesDoneMax=parseInt(ById('KOCAttackCitiesDoneMax').value);
 
@@ -1231,6 +1235,8 @@ var KOCAttack={
 			"attackOrder":"closest",
 			"attackpriority":"None",
 			"autoRemoveReports":true,
+			"rallyKeep":0,
+			"disableDrawMapIcons":false,
 			"attackSecsSinceLastCity":60*60*12,
 			"attackSecsSinceLastCamp":3600,
 			"attackSecsSinceLastWild":3600,
@@ -3280,7 +3286,7 @@ var KOCAttack={
 			//}
 			
 			// Make sure we have more than two available slots in attack queue if this is a suicide wave (unless there are only two slots even allowed)
-			this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum;
+			this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum - this.options.rallyKeep;
 			//this.Log("Available marches: "+available_marches_num);
 			if(attack.a.suicidewave && attack.a.currenttattackwavetype != "normal"){
 				//this.Log("Current attack wave type: "+attack.a.currenttattackwavetype);
@@ -4073,7 +4079,7 @@ var KOCAttack={
 		}
 		this.DetermineCurrentRallyPointLevel();
 		this.DetermineCurrentMarchesNum();
-		this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum;
+		this.available_marches_num = this.currentRallyPointLevel - this.currentMarchesNum - this.options.rallyKeep;
 		var currentTroops=this.GetArmySize();
 		var currentResources=this.GetResourcesSize();
 		var mapCoord=this.GetCurrentMapCoord();
@@ -4917,7 +4923,7 @@ var KOCAttack={
 			// Hide the invite friends tab on page load
 			if(!t.inviteFriendsTabHidden && t.options.disableInviteFriends){
 				var tabBar=ById("main_engagement_tabs");
-				if(tabBar){
+				if(false){
 					var inviteFriendsTab=nHtml.FindByXPath(tabBar,".//a[contains(@onclick,'invite_friends_popup')]");
 					if(inviteFriendsTab){
 						inviteFriendsTab.style.display="none";
@@ -4942,8 +4948,7 @@ var KOCAttack={
 			}
 			
 			if (t.currentPage == 'kabam_page'){
-				t.Log('kabam_page');
-				KOCAttack.ReloadWindow();
+				return;
 			}
 
 			// Code strictly for page: koc_game
@@ -5109,7 +5114,8 @@ var KOCAttack={
 					withinDomInserted=true;
 					setTimeout(function() {
 						try {
-							t.DrawLevelIcons();
+							if(this.options.disableDrawMapIcons)
+								t.DrawLevelIcons();
 							t.OnToolTipAppear(e.target);
 						} finally {
 							withinDomInserted=false;
