@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.6.8
+// @version          0.9.6.9
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.8';
+var KOCAversion = '0.9.6.9';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -4921,9 +4921,9 @@ var KOCAttack={
 			}
 			
 			// Hide the invite friends tab on page load
-			if(!t.inviteFriendsTabHidden && t.options.disableInviteFriends){
+			if(!t.inviteFriendsTabHidden && this.options.disableInviteFriends){
 				var tabBar=ById("main_engagement_tabs");
-				if(false){
+				if(tabBar){
 					var inviteFriendsTab=nHtml.FindByXPath(tabBar,".//a[contains(@onclick,'invite_friends_popup')]");
 					if(inviteFriendsTab){
 						inviteFriendsTab.style.display="none";
@@ -5028,7 +5028,7 @@ var KOCAttack={
 						t.ClickShareToWall(target);
 					},
 					'invitePopup':function(target) {
-						if(t.options.disableInviteFriends){
+						if(this.options.disableInviteFriends && false){
 							// Hide the invite popup if auto attack is enabled
 							target.parentNode.removeChild(target);
 						}
