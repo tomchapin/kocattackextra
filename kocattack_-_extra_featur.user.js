@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.6.9
+// @version          0.9.7.0
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.6.9';
+var KOCAversion = '0.9.7.0';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -5253,6 +5253,10 @@ function SetupQuickMarchButton(useRetryMarch) {
 		[['"Return"])','"Return"]); if(t>0) { var uname=unitcost["unt"+s][0]; w+=uname[0]+uname[uname.length-1]+":"+t+", "; } ']],
 		[['"Count"])','"Count"]); if(t>0) { var uname=unitcost["unt"+s][0]; w+=uname[0]+uname[uname.length-1]+":"+t+", "; } ']],
 	];
+	var attack_generatequeueReplacesW2=[
+		[['var w = 0;','var w = "K:"+seed.knights["city" + currentcityid]["knt" + E].combat+", "; ']],
+		[['w += y','if(y>0) { var uname=unitcost["unt"+cm.UNIT_TYPES[t]][0]; w+=uname[0]+uname[uname.length-1]+":"+y+", "; }']],
+	];
 		
 /*****	
 	if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1) {
@@ -5340,7 +5344,7 @@ function SetupQuickMarchButton(useRetryMarch) {
 	var funcStr=window['attack_generatequeue'].toString();
 	if(funcStr.indexOf(' var w = 0;')>=0) {
 		// camelotmain-218
-		AddArray(arr,attack_generatequeueReplacesW);
+		AddArray(arr,attack_generatequeueReplacesW2);
 	} else if(funcStr.indexOf('; var r = 0;')>=0) {
 		AddArray(arr,attack_generatequeueReplacesR);
 	} else if(funcStr.indexOf('; var s = 0;')>=0) {
