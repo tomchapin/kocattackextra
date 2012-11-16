@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.7.0
+// @version          0.9.7.3
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -11,11 +11,10 @@
 // @include          *facebook.com/connect/uiserver.php*
 // @include          *kingdomsofcamelot.com/*standAlone.php*
 
-// @require          http://tomchapin.me/auto-updater.php?id=89473
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.7.0';
+var KOCAversion = '0.9.7.3';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -4901,7 +4900,7 @@ var KOCAttack={
 		// Code strictly for page: koc_game
 		if(t.currentPage == "koc_game"){
 			//Check for strange majic error
-			setTimeout(function(){checkStrangeMagic();},15000);
+			//setTimeout(function(){checkStrangeMagic();},15000);
 					
 			window.setTimeout(function() {
 				if(!t.pageLoaded && t.GetAutoAttack() && !t.IsMapperRunning()) {
