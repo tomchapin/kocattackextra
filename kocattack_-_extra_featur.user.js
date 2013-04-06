@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name             KOCAttack - Extra Features!
-// @version          0.9.7.3
+// @version          0.9.7.4
 // @namespace        KOCAttack-Extra
 // @homepage         http://userscripts.org/scripts/show/89473
 // @description      Same as the original Kingdoms of Camelot Attack script, but with extra features.
@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 
-var KOCAversion = '0.9.7.3';
+var KOCAversion = '0.9.7.4';
 
 // Override the default alert functionality of the web browser (which causes the script to pause)
 // Instead of displaying alert popups, messages will be displayed in the firefox console
@@ -3085,6 +3085,14 @@ var KOCAttack={
 					if(levelnum>rallypointlevel){
 						rallypointlevel = levelnum;
 					}
+				} else {
+					var b_class = building.className.split("_");
+					if(b_class != null){
+						if(parseInt(b_class[1]) == 12){
+							rallypointlevel = parseInt(b_class[2]);
+							// this.Log("classname "+b_class[1] +" "+b_class[2]);
+						}
+					}
 				}
 			}
 			if(rallypointlevel==0){
@@ -3109,7 +3117,7 @@ var KOCAttack={
 					}
 				}
 			}
-			//this.Log("Rally point level in this city is: "+rallypointlevel);
+			this.Log("Rally point level in this city is: "+rallypointlevel);
 		}
 		if(rallypointlevel==12) rallypointlevel = 11;
 		this.currentRallyPointLevel = rallypointlevel;
