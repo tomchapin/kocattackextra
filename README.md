@@ -8,7 +8,7 @@ If someone out there would like to continue development on KoCAttack Extra for s
 
 This script is intended for use with KoC Power Tools (KoC Scripters Edition) and KoC Power Bot (KoC Scripters Edition)!
 
-This is an upgraded version of the Kingdoms of Camelot Attack helper that was published on userscripts by niknah (as of Oct. 24, 2010). His original script is located here: http://userscripts.org/scripts/show/76594
+This is an upgraded version of the Kingdoms of Camelot Attack helper that was published on userscripts by niknah (as of Oct. 24, 2010). His original script was located here: http://userscripts.org/scripts/show/76594
 
 This version of the KOCAttack script has a number of extra features, however:
 
@@ -34,20 +34,6 @@ This version of the KOCAttack script has a number of extra features, however:
 
 Important: This script is currently only supported by the Firefox web browsers. You MUST use Firefox and the Greasemonkey addon to run this script! If you attempt to install it while using Google Chrome, you will most likely get a lot of errors.
 
-Google Code Project
-
-This script is now being collaborated on by a couple of people, via the Google Code "kocattackextra" project. Any known and verified problems with the script should be added to the issue list there so that they can be dealt with by a developer. The Google Code URL is as follows: http://code.google.com/p/kocattackextra/
-
-If you want to try the *absolute latest version* of this script, you can get it straight from the official Google Code project: 
-http://kocattackextra.googlecode.com/svn/trunk/kocattack_-_extra_featur.user.js
-
-How to Install
-
-1. Install the "Greasemonkey" addon for Firefox and restart your browser.
-
-2. Click the "Install" button here on the script page (doh!)
-
-2. Reload the KoC facebook app.
 
 ### How to Auto Help Alliance Members
 
@@ -162,14 +148,14 @@ To Do List
 
 ### Code Contributors
 
-niknah
-Thomas Chapin
-jontey
-George Jetson
-Fred Flintstone
-DonDavici
-Joe Ruddy
-various others - (send me a message if you contributed in some way and would like to be listed here)
+* niknah
+* Thomas Chapin
+* jontey
+* George Jetson
+* Fred Flintstone
+* DonDavici
+* Joe Ruddy
+* various others - (send me a message if you contributed in some way and would like to be listed here)
 
 ## History
 
